@@ -13,7 +13,7 @@ import (
 type respCode int
 
 const (
-	success respCode = 0
+	success respCode = iota
 	notLoggedIn
 	roomNotExist
 )
