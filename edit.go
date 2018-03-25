@@ -55,24 +55,16 @@ func (e *Editting) Leave(u *User) {
 	delete(e.userEdittings, u.ID)
 }
 
-// cursorPosValid return whether pos is a valid cursor position in the document
-func (e *Editting) cursorPosValid(pos int) bool {
-	return pos >= 0 && pos <= len(e.doc.Content)
-}
-
 // CursorPosition returns user's cursor position
 func (e *Editting) CursorPosition(user *User) (int, error) {
 	e.uMtx.Lock()
 	defer e.uMtx.Unlock()
-	e.doc.cMtx.Lock()
-	defer e.doc.cMtx.Unlock()
+	e.doc.mtx.Lock()
+	defer e.doc.mtx.Unlock()
 
 	ue, ok := e.userEdittings[user.ID]
 	if !ok {
 		return 0, fmt.Errorf("user %d did not attend the editting", user.ID)
-	}
-	if !e.cursorPosValid(ue.cursorPos) {
-		return 0, fmt.Errorf("user cursor position %d is invalid, userID: %d", ue.cursorPos, user.ID)
 	}
 	return ue.cursorPos, nil
 }
@@ -81,16 +73,14 @@ func (e *Editting) CursorPosition(user *User) (int, error) {
 func (e *Editting) MoveCursor(pos int, user *User) error {
 	e.uMtx.Lock()
 	defer e.uMtx.Unlock()
-	e.doc.cMtx.Lock()
-	defer e.doc.cMtx.Unlock()
-
-	if !e.cursorPosValid(pos) {
-		return fmt.Errorf("invalid position %d", pos)
-	}
 
 	ue, ok := e.userEdittings[user.ID]
 	if !ok {
 		return fmt.Errorf("user %d did not attend the editting", user.ID)
+	}
+
+	if err := e.doc.CheckOffset(pos); err != nil {
+		return err
 	}
 	ue.cursorPos = pos
 	return nil
@@ -100,29 +90,25 @@ func (e *Editting) MoveCursor(pos int, user *User) error {
 func (e *Editting) Insert(str string, user *User) error {
 	e.uMtx.Lock()
 	defer e.uMtx.Unlock()
-	e.doc.cMtx.Lock()
-	defer e.doc.cMtx.Unlock()
 
 	ue, ok := e.userEdittings[user.ID]
 	if !ok {
 		return fmt.Errorf("user %d did not attend the editting", user.ID)
 	}
-	if !e.cursorPosValid(ue.cursorPos) {
-		return fmt.Errorf("user cursor position %d is invalid, userID: %d", ue.cursorPos, user.ID)
+	n, err := e.doc.Insert(ue.cursorPos, str)
+	if err != nil {
+		return err
 	}
 
-	e.doc.Content = e.doc.Content[:ue.cursorPos] + str + e.doc.Content[:ue.cursorPos]
-
 	// update cursors
-	if len(e.doc.Content) == len(str) {
-		ue.cursorPos += len(str)
-	} else {
+	if e.doc.Len() != n {
 		for _, u := range e.userEdittings {
-			if u.cursorPos >= ue.cursorPos {
-				u.cursorPos += len(str)
+			if u.cursorPos > ue.cursorPos {
+				u.cursorPos += n
 			}
 		}
 	}
+	ue.cursorPos += n
 	return nil
 }
 
@@ -130,44 +116,20 @@ func (e *Editting) Insert(str string, user *User) error {
 func (e *Editting) Delete(n int, before bool, user *User) error {
 	e.uMtx.Lock()
 	defer e.uMtx.Unlock()
-	e.doc.cMtx.Lock()
-	defer e.doc.cMtx.Unlock()
 
 	ue, ok := e.userEdittings[user.ID]
 	if !ok {
 		return fmt.Errorf("user %d did not attend the editting", user.ID)
 	}
-	if !e.cursorPosValid(ue.cursorPos) {
-		return fmt.Errorf("user cursor position %d is invalid, userID: %d", ue.cursorPos, user.ID)
+
+	begin, end, err := e.doc.Delete(ue.cursorPos, n, before)
+	if err != nil {
+		return err
 	}
-
-	var begin, end int
-	if before {
-		begin = ue.cursorPos - n
-		end = ue.cursorPos
-
-		if begin < 0 {
-			begin = 0
-			n = ue.cursorPos
-		}
-		ue.cursorPos -= n // update current user's cursor
-
-	} else {
-		begin = ue.cursorPos
-		end = ue.cursorPos + n
-
-		cLen := len(e.doc.Content)
-		if end > cLen {
-			end = cLen
-			n = cLen - ue.cursorPos
-		}
-	}
-
-	e.doc.Content = e.doc.Content[0:begin] + e.doc.Content[end:]
 
 	// update cursors for other users
 	for _, u := range e.userEdittings {
-		if u.cursorPos > end {
+		if u.cursorPos >= end {
 			u.cursorPos -= n
 		} else if u.cursorPos > begin && u.cursorPos < end {
 			u.cursorPos = begin
