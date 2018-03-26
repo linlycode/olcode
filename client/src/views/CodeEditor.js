@@ -70,7 +70,7 @@ class CodeEditor extends React.Component {
 
 	componentWillReceiveProps(nextProps) {
 		if (!this.props.room && nextProps.room) {
-			nextProps.room.docSync.setSyncCallback(this.sync)
+			nextProps.room.docSync.setCallbacks({ onSyncDoc: this.syncDoc })
 		}
 	}
 
@@ -80,25 +80,40 @@ class CodeEditor extends React.Component {
 
 	onContentChange = (_, e) => {
 		const { room } = this.props
-		console.log(e.action)
-		if (room) {
-			room.docSync.modifyDoc(e.action, e.lines.join('\n'))
+		if (!room) {
+			return
+		}
+		const content = e.lines.join('\n')
+		switch (e.action) {
+			case 'insert':
+				room.docSync.insert(content)
+				break
+			case 'remove':
+				{
+					const before =
+						this.editor.selection.getCursor().column === e.start.column
+					room.docSync.delete(content, before)
+				}
+				break
+			default:
+				throw new Error('unexpected action')
 		}
 	}
 
 	onCursorChange = selection => {
-		if (!this.props.room) {
+		const { room } = this.props
+		if (!room) {
 			return
 		}
 		const { doc } = this.editor.session
 		const lines = doc.getLines(0, doc.getLength())
 		const offset = cursorToOffset(lines, selection.getCursor())
-		this.props.room.docSync.updateCursor(offset)
+		room.docSync.updateCursor(offset)
 	}
 
 	onFocus = () => {}
 
-	sync(editting) {
+	syncDoc(editting) {
 		if (!this.editor) {
 			return
 		}

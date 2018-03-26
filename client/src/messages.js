@@ -1,10 +1,10 @@
 const MsgType = {
-	syncDoc: 1,
+	syncDoc: 0,
+	roomUserListChanged: 1,
 	roomDeleted: 2,
-	roomUserChanged: 3,
-	docInsert: 101,
-	docDelete: 102,
-	moveCursor: 103,
+	docInsert: 100,
+	docDelete: 101,
+	moveCursor: 102,
 }
 
 export default MsgType

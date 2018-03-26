@@ -19,18 +19,32 @@ class RoomWidget extends React.Component {
 
 	onEnterRoomClick = () => {
 		const { roomManager } = this.props.actors
-		this.props.setRoom(roomManager.attend(this.state.roomID))
+		this.enterRoom(roomManager.attend(this.state.roomID))
 	}
 
 	onCreateRoomClick = () => {
 		const { roomManager } = this.props.actors
 		roomManager.create().then(roomID => {
-			this.props.setRoom(roomManager.attend(roomID))
+			this.enterRoom(roomManager.attend(roomID))
 		})
 	}
 
 	onLeaveRoomClick = () => {
-		this.props.actors.roomManager.leave(this.props.room)
+		this.props.actors.roomManager.leave(this.props.room).then(() => {
+			this.props.setRoom(null)
+		})
+	}
+
+	onRoomDeleted = data => {
+		console.log('room deleted', data)
+		this.props.setRoom(null)
+	}
+
+	enterRoom = room => {
+		room.docSync.setCallbacks({
+			onRoomDeleted: this.onRoomDeleted,
+		})
+		this.props.setRoom(room)
 	}
 
 	render() {
