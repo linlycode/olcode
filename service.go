@@ -2,6 +2,7 @@ package olcode
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -12,15 +13,29 @@ type Service struct {
 	server *http.Server
 }
 
+func serveHome(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL)
+	if r.URL.Path != "/" {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	http.ServeFile(w, r, "home.html")
+}
+
 // NewService cretes a service
-func NewService(port int16) *Service {
-	h := newHandler()
+func NewService(port int16, homePath string) *Service {
+	h := newHandler(homePath)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/login", h.login)
-	r.HandleFunc("/create", h.create)
-	r.HandleFunc("/attend", h.attend)
-	r.HandleFunc("/leave", h.leave)
+	r.HandleFunc("/api/login", h.login)
+	r.HandleFunc("/api/create_room", h.create)
+	r.HandleFunc("/api/ws/attend", h.attend)
+	r.HandleFunc("/", h.serverHome)
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(homePath))))
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),

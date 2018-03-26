@@ -8,7 +8,8 @@ import (
 
 func main() {
 	var port int16 = 5432
-	s := olcode.NewService(port)
+	var homePath = "/Users/xkwei/github-workspace/yungewu-cloudapp_go/src/olcode/client/dist"
+	s := olcode.NewService(port, homePath)
 
 	log.Printf("starting service at port %d", port)
 	if err := s.Serve(); err != nil {
