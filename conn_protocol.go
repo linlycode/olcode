@@ -14,7 +14,7 @@ const (
 
 const (
 	// recv
-	msgDocInsert = iota
+	msgDocInsert = iota + 100
 	msgDocDelete
 	msgMoveCursor
 )
