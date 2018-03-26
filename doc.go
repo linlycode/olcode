@@ -2,7 +2,6 @@ package olcode
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"sync"
 )
@@ -46,11 +45,11 @@ func (d *Document) Len() int {
 	return len(d.content)
 }
 
-// Contents returns the current contents of the document
-func (d *Document) Contents() string {
+// Content returns the current contents of the document
+func (d *Document) Content() string {
 	d.mtx.RLock()
 	defer d.mtx.RUnlock()
-	return fmt.Sprintf("%s", d.content)
+	return d.content
 }
 
 // Insert inserts `text` at the offset of Content

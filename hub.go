@@ -76,6 +76,10 @@ func (h *Hub) broadcastUserList() {
 	}
 }
 
+func (h *Hub) broadcastDocDetail() {
+
+}
+
 func (h *Hub) run() {
 	for {
 		select {

@@ -48,7 +48,7 @@ func (c *clientRoomConn) handleMoveCursor(p *connProtocol) {
 		return
 	}
 
-	if err := c.hub.room.moveCursor(mvMsg.offset, c.user); err != nil {
+	if err := c.hub.room.moveCursor(mvMsg.Offset, c.user); err != nil {
 		log.Printf("fail to move cursor, err=%v", err)
 		return
 	}

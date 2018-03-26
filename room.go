@@ -7,7 +7,7 @@ const invalidRoomID roomID = "'"
 type room struct {
 	id       roomID
 	creator  *User
-	editting *Editting
+	editting *Editing
 }
 
 func (r *room) attend(user *User) {
@@ -18,7 +18,7 @@ func (r *room) leave(user *User) {
 	r.editting.Leave(user)
 }
 
-func (r *room) getUserList() []*UserEditting {
+func (r *room) getUserList() []*UserEditing {
 	return r.editting.GetUserEditingList()
 }
 

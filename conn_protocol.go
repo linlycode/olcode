@@ -42,5 +42,10 @@ func (c *connProtocol) UnmarshalTo(v interface{}) error {
 }
 
 type moveCursorMsg struct {
-	offset int
+	Offset int `json:"offset"`
+}
+
+type docDetailMsg struct {
+	Content      string         `json:"content"`
+	UserEditings []*UserEditing `json:"user_editings"`
 }

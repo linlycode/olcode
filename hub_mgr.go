@@ -35,7 +35,7 @@ func (m *HubMgr) registerHub(user *User) (roomID, error) {
 	r := &room{
 		id:       id,
 		creator:  user,
-		editting: NewEditting(&Document{}, user),
+		editting: NewEditing(&Document{}, user),
 	}
 
 	h := newHub(r)
