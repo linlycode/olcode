@@ -5,8 +5,8 @@ import (
 	"sync"
 )
 
-// userEditting contains the editting info of the user
-type userEditting struct {
+// UserEditting contains the editting info of the user
+type UserEditting struct {
 	user      *User
 	cursorPos int
 }
@@ -16,12 +16,12 @@ type Editting struct {
 	doc *Document
 
 	uMtx          sync.Mutex
-	userEdittings map[int64]*userEditting
+	userEdittings map[int64]*UserEditting
 }
 
 // NewEditting creates an editting
 func NewEditting(doc *Document, user *User) *Editting {
-	ues := make(map[int64]*userEditting)
+	ues := make(map[int64]*UserEditting)
 	e := &Editting{
 		doc:           doc,
 		userEdittings: ues,
@@ -37,6 +37,17 @@ func (e *Editting) UserCount() int {
 	return len(e.userEdittings)
 }
 
+// GetUserEditingList returns the information of all the editing users
+func (e *Editting) GetUserEditingList() []*UserEditting {
+	e.uMtx.Lock()
+	defer e.uMtx.Unlock()
+	ues := make([]*UserEditting, 0)
+	for _, ue := range e.userEdittings {
+		ues = append(ues, ue)
+	}
+	return ues
+}
+
 // Attend handles user attending the editing
 func (e *Editting) Attend(u *User) {
 	e.uMtx.Lock()
@@ -45,7 +56,7 @@ func (e *Editting) Attend(u *User) {
 	if ue, ok := e.userEdittings[u.ID]; ok {
 		ue.user = u
 	}
-	e.userEdittings[u.ID] = &userEditting{user: u}
+	e.userEdittings[u.ID] = &UserEditting{user: u}
 }
 
 // Leave handles user leaving the editting
