@@ -78,7 +78,7 @@ func (c *clientRoomConn) readPump() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
+				log.Printf("fail to read message error: %v", err)
 			}
 			break
 		}
@@ -98,6 +98,7 @@ func (c *clientRoomConn) writePump() {
 	for {
 		select {
 		case p, ok := <-c.sendCh:
+			log.Printf("will send msg to client")
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel.
@@ -111,7 +112,13 @@ func (c *clientRoomConn) writePump() {
 				return
 			}
 
-			if _, err := w.Write(p.Encode()); err != nil {
+			data, err := p.Encode()
+			if err != nil {
+				log.Printf("fail to encode msg, err=%v", err)
+				continue
+			}
+
+			if _, err := w.Write(data); err != nil {
 				log.Printf("fail to write message, err=%v", err)
 				return
 			}
@@ -130,15 +137,17 @@ func (c *clientRoomConn) writePump() {
 	}
 }
 
-// serveWs handles websocket requests from the peer.
-func serveWs(user *User, hub *Hub, w http.ResponseWriter, r *http.Request) {
+// buildClientRoomConn handles websocket requests from the peer.
+func buildClientRoomConn(user *User, hub *Hub, w http.ResponseWriter, r *http.Request) {
+	log.Printf("start to build client room conn")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		log.Printf("fail to upgrade connection, err=%v", err)
 		return
 	}
+	log.Printf("client connection upgraded")
 	crConn := newClientRoomConn(user, hub, conn)
-	hub.registerCh <- crConn
+	hub.registerClientRoomConn(crConn)
 
 	go crConn.writePump()
 	go crConn.readPump()

@@ -21,7 +21,7 @@ func NewHubMgr() *HubMgr {
 	}
 }
 
-func (m *HubMgr) registerRoom(user *User) (roomID, error) {
+func (m *HubMgr) registerHub(user *User) (roomID, error) {
 	var id roomID
 	for {
 		id = roomID(genRandString(16))
@@ -38,15 +38,14 @@ func (m *HubMgr) registerRoom(user *User) (roomID, error) {
 		editting: NewEditting(&Document{}, user),
 	}
 
-	if err := r.attend(user); err != nil {
-		return invalidRoomID, err
-	}
+	h := newHub(r)
+	m.hubs[id] = h
 
-	m.hubs[id] = newHub(r)
+	go h.run()
 	return id, nil
 }
 
-func (m *HubMgr) unregisterRoom(id roomID, user *User) error {
+func (m *HubMgr) unregisterHub(id roomID, user *User) error {
 	m.mtx.Lock()
 	defer m.mtx.Unlock()
 

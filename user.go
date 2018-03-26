@@ -6,8 +6,8 @@ import (
 
 // User is a user
 type User struct {
-	ID   int64
-	Name string
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
 }
 
 type userStore struct {

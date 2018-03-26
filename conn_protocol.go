@@ -29,8 +29,8 @@ type connProtocol struct {
 	Data    string `json:"data"`
 }
 
-func (c *connProtocol) Encode() []byte {
-	return nil
+func (c *connProtocol) Encode() ([]byte, error) {
+	return json.Marshal(c)
 }
 
 func (c *connProtocol) Decode(bs []byte) error {
