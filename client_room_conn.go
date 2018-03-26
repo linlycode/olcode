@@ -41,9 +41,9 @@ func newClientRoomConn(user *User, hub *Hub, conn *websocket.Conn) *clientRoomCo
 	}
 }
 
-func (c *clientRoomConn) handleMoveCursor(msg []byte) {}
-func (c *clientRoomConn) handleDocInsert(msg []byte)  {}
-func (c *clientRoomConn) handleDocDelete(msg []byte)  {}
+func (c *clientRoomConn) handleMoveCursor(p *connProtocol) {}
+func (c *clientRoomConn) handleDocInsert(p *connProtocol)  {}
+func (c *clientRoomConn) handleDocDelete(p *connProtocol)  {}
 
 func (c *clientRoomConn) processRecvMsg(msg []byte) {
 	p := &connProtocol{}
@@ -52,8 +52,7 @@ func (c *clientRoomConn) processRecvMsg(msg []byte) {
 		return
 	}
 
-	var h func(msg []byte)
-
+	var h func(p *connProtocol)
 	switch p.Type() {
 	case msgDocInsert:
 		h = c.handleDocInsert
@@ -65,8 +64,7 @@ func (c *clientRoomConn) processRecvMsg(msg []byte) {
 		log.Printf("should be valid recv msg type, type=%v", p.Type())
 		return
 	}
-
-	h(msg)
+	h(p)
 }
 
 func (c *clientRoomConn) unregister() {
@@ -143,6 +141,7 @@ func (c *clientRoomConn) writePump() {
 				log.Printf("fail to write ping message, err=%v", err)
 				return
 			}
+			// daemon for sending doc detail
 		}
 	}
 }
