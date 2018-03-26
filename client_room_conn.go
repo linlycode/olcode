@@ -41,6 +41,10 @@ func newClientRoomConn(user *User, hub *Hub, conn *websocket.Conn) *clientRoomCo
 	}
 }
 
+func (c *clientRoomConn) handleMoveCursor(msg []byte) {}
+func (c *clientRoomConn) handleDocInsert(msg []byte)  {}
+func (c *clientRoomConn) handleDocDelete(msg []byte)  {}
+
 func (c *clientRoomConn) processRecvMsg(msg []byte) {
 	p := &connProtocol{}
 	if err := p.Decode(msg); err != nil {
@@ -48,19 +52,21 @@ func (c *clientRoomConn) processRecvMsg(msg []byte) {
 		return
 	}
 
-	t := p.Type()
-	if t <= msgRecvStart || t >= msgRecvEnd {
-		log.Printf("not recv message, type=%v", t)
+	var h func(msg []byte)
+
+	switch p.Type() {
+	case msgDocInsert:
+		h = c.handleDocInsert
+	case msgDocDelete:
+		h = c.handleDocDelete
+	case msgMoveCursor:
+		h = c.handleMoveCursor
+	default:
+		log.Printf("should be valid recv msg type, type=%v", p.Type())
 		return
 	}
 
-	switch t {
-	case msgDocInsert:
-	case msgDocDelete:
-	case msgMoveCursor:
-	default:
-		log.Panic("should be valid recve msg type range")
-	}
+	h(msg)
 }
 
 func (c *clientRoomConn) unregister() {

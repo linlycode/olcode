@@ -6,23 +6,19 @@ import (
 
 const (
 	// send
-	msgSendStart = iota
-	msgDocDetail
+	msgDocDetail = iota
 	msgRoomDeleted
 	msgUserList
-	msgSendEnd
 )
-
-const msgTypeLen = 4
 
 const (
 	// recv
-	msgRecvStart = iota + 100
-	msgDocInsert
+	msgDocInsert = iota
 	msgDocDelete
 	msgMoveCursor
-	msgRecvEnd
 )
+
+const msgTypeLen = 4
 
 type connProtocol struct {
 	MsgType int    `json:"msg_type"`
@@ -43,4 +39,8 @@ func (c *connProtocol) Type() int {
 
 func (c *connProtocol) UnmarshalTo(v interface{}) error {
 	return json.Unmarshal([]byte(c.Data), v)
+}
+
+type moveCursorMsg struct {
+	offset int
 }
