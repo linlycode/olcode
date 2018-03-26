@@ -10,13 +10,18 @@ const (
 	broadcastMsgCap = 2 * 1024
 )
 
+type broadcastMsg struct {
+	p      *connProtocol
+	sender *User
+}
+
 // Hub is a hub for managing all the connections in some room
 type Hub struct {
 	room *room
 	// map[userID]conn
 	m           map[int64]*clientRoomConn
 	mMtx        sync.RWMutex
-	broadcastCh chan *connProtocol
+	broadcastCh chan *broadcastMsg
 	destroyCh   chan struct{}
 }
 
@@ -24,7 +29,7 @@ func newHub(room *room) *Hub {
 	return &Hub{
 		room:        room,
 		m:           make(map[int64]*clientRoomConn),
-		broadcastCh: make(chan *connProtocol, broadcastMsgCap),
+		broadcastCh: make(chan *broadcastMsg, broadcastMsgCap),
 	}
 }
 
@@ -53,17 +58,19 @@ func (h *Hub) unregisterClientRoomConn(conn *clientRoomConn) {
 	delete(h.m, conn.user.ID)
 }
 
-func (h *Hub) broadcastMsg(msg *connProtocol) {
-	log.Printf("broadcast message, type=%v", msg.Type())
+func (h *Hub) broadcastMsg(msg *broadcastMsg) {
+	log.Printf("broadcast message, type=%v, sender=%v", msg.p.Type(), msg.sender.ID)
 	h.mMtx.RLock()
 	defer h.mMtx.RUnlock()
 	for _, crConn := range h.m {
-		crConn.sendCh <- msg
+		if crConn.user.ID != msg.sender.ID {
+			crConn.sendCh <- msg.p
+		}
 	}
 }
 
 // TODO: broadcast to everyone excluding sender
-func (h *Hub) broadcastUserList() {
+func (h *Hub) broadcastUserList(sender *User) {
 	log.Printf("broadcast user list")
 	bs, err := json.Marshal(&userListMsg{Users: h.room.getUserList()})
 	if err != nil {
@@ -71,14 +78,17 @@ func (h *Hub) broadcastUserList() {
 		return
 	}
 
-	h.broadcastCh <- &connProtocol{
-		MsgType: msgUserList,
-		Data:    string(bs),
+	h.broadcastCh <- &broadcastMsg{
+		p: &connProtocol{
+			MsgType: msgUserList,
+			Data:    string(bs),
+		},
+		sender: sender,
 	}
 }
 
 // TODO: broadcast to everyone excluding sender
-func (h *Hub) broadcastDocSync() {
+func (h *Hub) broadcastDocSync(sender *User) {
 	log.Printf("broadcast doc detail")
 	content, cursorM := h.room.getDocDetail()
 	docDetail, err := json.Marshal(&docSyncMsg{Content: content, CursorMap: cursorM})
@@ -87,9 +97,12 @@ func (h *Hub) broadcastDocSync() {
 		return
 	}
 
-	h.broadcastCh <- &connProtocol{
-		MsgType: msgDocSync,
-		Data:    string(docDetail),
+	h.broadcastCh <- &broadcastMsg{
+		p: &connProtocol{
+			MsgType: msgDocSync,
+			Data:    string(docDetail),
+		},
+		sender: sender,
 	}
 }
 

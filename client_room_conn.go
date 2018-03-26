@@ -53,7 +53,7 @@ func (c *clientRoomConn) handleMoveCursor(p *connProtocol) {
 		return
 	}
 
-	c.hub.broadcastDocSync()
+	c.hub.broadcastDocSync(c.user)
 }
 
 func (c *clientRoomConn) handleDocInsert(p *connProtocol) {
@@ -68,7 +68,7 @@ func (c *clientRoomConn) handleDocInsert(p *connProtocol) {
 		return
 	}
 
-	c.hub.broadcastDocSync()
+	c.hub.broadcastDocSync(c.user)
 }
 
 func (c *clientRoomConn) handleDocDelete(p *connProtocol) {
@@ -83,7 +83,7 @@ func (c *clientRoomConn) handleDocDelete(p *connProtocol) {
 		return
 	}
 
-	c.hub.broadcastDocSync()
+	c.hub.broadcastDocSync(c.user)
 }
 
 func (c *clientRoomConn) processRecvMsg(msg []byte) {
@@ -116,7 +116,7 @@ func (c *clientRoomConn) readPump() {
 	defer func() {
 		c.conn.Close()
 		c.unregister()
-		c.hub.broadcastUserList()
+		c.hub.broadcastUserList(c.user)
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -141,7 +141,7 @@ func (c *clientRoomConn) writePump() {
 		ticker.Stop()
 		c.conn.Close()
 		c.unregister()
-		c.hub.broadcastUserList()
+		c.hub.broadcastUserList(c.user)
 	}()
 
 	for {
@@ -202,5 +202,5 @@ func buildClientRoomConn(user *User, hub *Hub, w http.ResponseWriter, r *http.Re
 	go crConn.writePump()
 	go crConn.readPump()
 
-	crConn.hub.broadcastUserList()
+	crConn.hub.broadcastUserList(user)
 }
