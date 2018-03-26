@@ -6,7 +6,7 @@ import (
 
 const (
 	// send
-	msgDocDetail = iota
+	msgDocSync = iota
 	msgRoomDeleted
 	msgUserList
 )
@@ -45,7 +45,11 @@ type moveCursorMsg struct {
 	Offset int `json:"offset"`
 }
 
-type docDetailMsg struct {
-	Content      string         `json:"content"`
-	UserEditings []*UserEditing `json:"user_editings"`
+type docSyncMsg struct {
+	Content   string        `json:"content"`
+	CursorMap map[int64]int `json:"cursor_map"`
+}
+
+type userListMsg struct {
+	Users []*User `json:"users"`
 }

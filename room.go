@@ -18,15 +18,14 @@ func (r *room) leave(user *User) {
 	r.editing.Leave(user)
 }
 
-func (r *room) getUserList() []*UserEditing {
-	return r.editing.GetUserEditingList()
+func (r *room) getUserList() []*User {
+	return r.editing.GetUserList()
 }
 
 func (r *room) moveCursor(offset int, user *User) error {
 	return r.editing.MoveCursor(offset, user)
 }
 
-func (r *room) getDocDetail() *docDetailMsg {
-	content, ues := r.editing.GetDetail()
-	return &docDetailMsg{Content: content, UserEditings: ues}
+func (r *room) getDocDetail() (string, map[int64]int) {
+	return r.editing.GetDetail()
 }

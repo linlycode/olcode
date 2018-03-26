@@ -65,7 +65,7 @@ func (h *Hub) broadcastMsg(msg *connProtocol) {
 // TODO: broadcast to everyone excluding sender
 func (h *Hub) broadcastUserList() {
 	log.Printf("broadcast user list")
-	listData, err := json.Marshal(h.room.getUserList())
+	bs, err := json.Marshal(&userListMsg{Users: h.room.getUserList()})
 	if err != nil {
 		log.Printf("fail to marshal user list, err=%v", err)
 		return
@@ -73,21 +73,22 @@ func (h *Hub) broadcastUserList() {
 
 	h.broadcastCh <- &connProtocol{
 		MsgType: msgUserList,
-		Data:    string(listData),
+		Data:    string(bs),
 	}
 }
 
 // TODO: broadcast to everyone excluding sender
-func (h *Hub) broadcastDocDetail() {
+func (h *Hub) broadcastDocSync() {
 	log.Printf("broadcast doc detail")
-	docDetail, err := json.Marshal(h.room.getDocDetail())
+	content, cursorM := h.room.getDocDetail()
+	docDetail, err := json.Marshal(&docSyncMsg{Content: content, CursorMap: cursorM})
 	if err != nil {
 		log.Printf("fail to marsh doc detail, err=%v", err)
 		return
 	}
 
 	h.broadcastCh <- &connProtocol{
-		MsgType: msgDocDetail,
+		MsgType: msgDocSync,
 		Data:    string(docDetail),
 	}
 }

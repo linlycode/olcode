@@ -53,7 +53,7 @@ func (c *clientRoomConn) handleMoveCursor(p *connProtocol) {
 		return
 	}
 
-	c.hub.broadcastUserList()
+	c.hub.broadcastDocSync()
 }
 
 func (c *clientRoomConn) handleDocInsert(p *connProtocol) {}

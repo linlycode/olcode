@@ -15,16 +15,16 @@ type UserEditing struct {
 type Editing struct {
 	doc *Document
 
-	uMtx          sync.RWMutex
-	userEdittings map[int64]*UserEditing
+	uMtx         sync.RWMutex
+	userEditings map[int64]*UserEditing
 }
 
 // NewEditing creates an editting
 func NewEditing(doc *Document, user *User) *Editing {
 	ues := make(map[int64]*UserEditing)
 	e := &Editing{
-		doc:           doc,
-		userEdittings: ues,
+		doc:          doc,
+		userEditings: ues,
 	}
 	e.Attend(user)
 	return e
@@ -34,29 +34,29 @@ func NewEditing(doc *Document, user *User) *Editing {
 func (e *Editing) UserCount() int {
 	e.uMtx.RLock()
 	defer e.uMtx.RUnlock()
-	return len(e.userEdittings)
+	return len(e.userEditings)
 }
 
-// GetUserEditingList returns the information of all the editing users
-func (e *Editing) GetUserEditingList() []*UserEditing {
+// GetUserList returns the information of all the editing users
+func (e *Editing) GetUserList() []*User {
 	e.uMtx.RLock()
 	defer e.uMtx.RUnlock()
-	ues := make([]*UserEditing, 0)
-	for _, ue := range e.userEdittings {
-		ues = append(ues, ue)
+	users := make([]*User, 0)
+	for _, ue := range e.userEditings {
+		users = append(users, ue.User)
 	}
-	return ues
+	return users
 }
 
 // GetDetail returns the details (content, userEditing)
-func (e *Editing) GetDetail() (string, []*UserEditing) {
+func (e *Editing) GetDetail() (string, map[int64]int) {
 	e.uMtx.RLock()
 	defer e.uMtx.RUnlock()
-	ues := make([]*UserEditing, 0)
-	for _, ue := range e.userEdittings {
-		ues = append(ues, ue)
+	cursorM := make(map[int64]int)
+	for id, ue := range e.userEditings {
+		cursorM[id] = ue.CursorPos
 	}
-	return e.doc.Content(), ues
+	return e.doc.Content(), cursorM
 }
 
 // Attend handles user attending the editing
@@ -64,14 +64,14 @@ func (e *Editing) Attend(u *User) {
 	e.uMtx.Lock()
 	defer e.uMtx.Unlock()
 
-	e.userEdittings[u.ID] = &UserEditing{User: u}
+	e.userEditings[u.ID] = &UserEditing{User: u}
 }
 
 // Leave handles user leaving the editting
 func (e *Editing) Leave(u *User) {
 	e.uMtx.Lock()
 	defer e.uMtx.Unlock()
-	delete(e.userEdittings, u.ID)
+	delete(e.userEditings, u.ID)
 }
 
 // CursorPosition returns user's cursor position
@@ -79,7 +79,7 @@ func (e *Editing) CursorPosition(user *User) (int, error) {
 	e.uMtx.RLock()
 	defer e.uMtx.RUnlock()
 
-	ue, ok := e.userEdittings[user.ID]
+	ue, ok := e.userEditings[user.ID]
 	if !ok {
 		return 0, fmt.Errorf("user %d did not attend the editting", user.ID)
 	}
@@ -91,7 +91,7 @@ func (e *Editing) MoveCursor(pos int, user *User) error {
 	e.uMtx.Lock()
 	defer e.uMtx.Unlock()
 
-	ue, ok := e.userEdittings[user.ID]
+	ue, ok := e.userEditings[user.ID]
 	if !ok {
 		return fmt.Errorf("user %d did not attend the editting", user.ID)
 	}
@@ -108,7 +108,7 @@ func (e *Editing) Insert(str string, user *User) error {
 	e.uMtx.Lock()
 	defer e.uMtx.Unlock()
 
-	ue, ok := e.userEdittings[user.ID]
+	ue, ok := e.userEditings[user.ID]
 	if !ok {
 		return fmt.Errorf("user %d did not attend the editting", user.ID)
 	}
@@ -119,7 +119,7 @@ func (e *Editing) Insert(str string, user *User) error {
 
 	// update cursors
 	if e.doc.Len() != n {
-		for _, u := range e.userEdittings {
+		for _, u := range e.userEditings {
 			if u.CursorPos > ue.CursorPos {
 				u.CursorPos += n
 			}
@@ -134,7 +134,7 @@ func (e *Editing) Delete(n int, before bool, user *User) error {
 	e.uMtx.Lock()
 	defer e.uMtx.Unlock()
 
-	ue, ok := e.userEdittings[user.ID]
+	ue, ok := e.userEditings[user.ID]
 	if !ok {
 		return fmt.Errorf("user %d did not attend the editting", user.ID)
 	}
@@ -145,7 +145,7 @@ func (e *Editing) Delete(n int, before bool, user *User) error {
 	}
 
 	// update cursors for other users
-	for _, u := range e.userEdittings {
+	for _, u := range e.userEditings {
 		if u.CursorPos >= end {
 			u.CursorPos -= n
 		} else if u.CursorPos > begin && u.CursorPos < end {
