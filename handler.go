@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"sync"
-
-	"github.com/gorilla/websocket"
 )
 
 type respCode int
@@ -24,24 +21,16 @@ type response struct {
 }
 
 type handler struct {
-	userStore   *userStore
-	roomManager *roomManager
-	wsUpgrader  *websocket.Upgrader
-	wsMtx       sync.Mutex
-	wsConns     map[int64]map[roomID]*websocket.Conn
+	userStore *userStore
+	hubMgr    *HubMgr
 }
 
 func newHandler() *handler {
 	registerSessionTypes()
 
 	return &handler{
-		userStore:   newUserStore(),
-		roomManager: newRoomManager(),
-		wsUpgrader: &websocket.Upgrader{
-			ReadBufferSize:  1024,
-			WriteBufferSize: 1024,
-		},
-		wsConns: make(map[int64]map[roomID]*websocket.Conn),
+		userStore: newUserStore(),
+		hubMgr:    NewHubMgr(),
 	}
 }
 
@@ -174,10 +163,12 @@ func (h *handler) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := h.roomManager.create(user)
-	resp := &createResponse{RoomID: id}
-
-	reply(w, success, resp)
+	id, err := h.hubMgr.registerRoom(user)
+	if err != nil {
+		replyServerError(w, fmt.Sprintf("fail to register room, err=%v", err))
+		return
+	}
+	reply(w, success, &createResponse{RoomID: id})
 }
 
 type attendRequest struct {
@@ -208,60 +199,15 @@ func (h *handler) attend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.roomManager.attend(id, user); err != nil {
-		reply(w, roomNotExist, nil)
-		return
-	}
-
-	h.wsMtx.Lock()
-	defer h.wsMtx.Unlock()
-
-	userConns, ok := h.wsConns[user.ID]
-	if !ok {
-		h.wsConns[user.ID] = make(map[roomID]*websocket.Conn)
-	}
-
-	if _, ok := userConns[id]; !ok {
-		conn, err := h.wsUpgrader.Upgrade(w, r, nil)
-		if err != nil {
-			replyServerError(w, fmt.Sprintf("failed to upgrade websocket, %s", err))
-		}
-		userConns[id] = conn
-	}
-
-	// conn.WriteJSON()
-
-	// reply(w, success, nil)
-}
-
-type leaveRequest attendRequest
-
-func (h *handler) leave(w http.ResponseWriter, r *http.Request) {
-	log.Printf("leave")
-
-	if !checkMethod(w, r, http.MethodPost) {
-		return
-	}
-
-	var req leaveRequest
-	if ok := parseRequest(w, r, &req); !ok {
-		return
-	}
-
-	user, err := getRequestUser(r)
+	hub, err := h.hubMgr.getHub(id)
 	if err != nil {
-		replyServerError(w, fmt.Sprintf("fail to get user from session, %s", err))
-		return
-	}
-	if user == nil {
-		reply(w, notLoggedIn, nil)
-		return
-	}
-
-	if err := h.roomManager.leave(req.RoomID, user); err != nil {
-		reply(w, roomNotExist, nil)
+		if err == errRoomNotExist {
+			reply(w, roomNotExist, nil)
+		} else {
+			replyServerError(w, fmt.Sprintf("fail to query hub, id=%v, err=%v", id, err))
+		}
 		return
 	}
 
-	reply(w, success, nil)
+	serveWs(user, hub, w, r)
 }

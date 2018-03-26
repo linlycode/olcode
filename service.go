@@ -17,10 +17,9 @@ func NewService(port int16) *Service {
 	h := newHandler()
 
 	r := mux.NewRouter()
-	r.HandleFunc("/login", h.login)
-	r.HandleFunc("/create", h.create)
-	r.HandleFunc("/attend", h.attend)
-	r.HandleFunc("/leave", h.leave)
+	r.HandleFunc("/api/login", h.login)
+	r.HandleFunc("/api/create", h.create)
+	r.HandleFunc("/api/ws/attend", h.attend)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
