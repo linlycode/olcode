@@ -27,18 +27,18 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 // NewService cretes a service
-func NewService(port int16, homePath string) *Service {
-	h := newHandler(homePath)
+func NewService(port, staticPath string) *Service {
+	h := newHandler(staticPath)
 
 	r := mux.NewRouter()
 	r.HandleFunc("/api/login", h.login)
 	r.HandleFunc("/api/create_room", h.create)
 	r.HandleFunc("/api/ws/attend", h.attend)
 	r.HandleFunc("/", h.serverHome)
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(homePath))))
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(staticPath))))
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
+		Addr:    fmt.Sprintf(":%s", port),
 		Handler: r,
 	}
 

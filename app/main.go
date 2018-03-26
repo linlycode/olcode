@@ -1,17 +1,20 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	"olcode"
 )
 
-func main() {
-	var port int16 = 5432
-	var homePath = "/Users/xkwei/github-workspace/yungewu-cloudapp_go/src/olcode/client/dist"
-	s := olcode.NewService(port, homePath)
+var port = flag.String("port", "5432", "service port")
+var staticPath = flag.String("static_path", "$GOPATH/src/olcode/client/dist", "static files dir")
 
-	log.Printf("starting service at port %d", port)
+func main() {
+	flag.Parse()
+	s := olcode.NewService(*port, *staticPath)
+
+	log.Printf("starting service at port %s", *port)
 	if err := s.Serve(); err != nil {
 		log.Printf("failed to start service, %s", err)
 	}

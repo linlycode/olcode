@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import HTTPClient from './HTTPClient'
 
-
 import { subscribe } from './store'
 import UserAuth from './UserAuth'
 

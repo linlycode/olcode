@@ -26,8 +26,8 @@ class UserNameWidget extends React.Component {
 				<button onClick={this.onLogoutClick}>Logout</button>
 			</span>
 		) : (
-				<LoginHandler onLoggedIn={this.onLoggedIn} />
-			)
+			<LoginHandler onLoggedIn={this.onLoggedIn} />
+		)
 	}
 }
 

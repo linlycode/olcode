@@ -1,12 +1,5 @@
 import request from 'superagent'
 
-function formatBodyResponse(resp) {
-	if (!resp.ok) {
-		throw resp.error
-	}
-	return resp.body
-}
-
 function formatResponse(resp) {
 	if (!resp.ok) {
 		throw resp.error
@@ -26,31 +19,35 @@ export default class HTTPClient {
 		this.port = port
 	}
 
+	createWebSocket(url, onClose, onMessage) {
+		const conn = new WebSocket(`ws://${this.host}:${this.port}${url}`)
+		conn.onclose = onClose
+		conn.onmessage = onMessage
+		return conn
+	}
+
 	l(relURL) {
-		if (relURL[0] != "/") {
-			relURL = "/".concat(relURL)
-		}
 		return `http://${this.host}:${this.port}${relURL}`
 	}
 
-  /**
-   * @param {String} url
-   * @param {Boolean} json
-   * @return {request.Request}
-   */
+	/**
+	 * @param {String} url
+	 * @param {Boolean} json
+	 * @return {request.Request}
+	 */
 	post(url, json = true) {
-		return request.post(this.l(url)).use(req => this._makeRequest(req, json))
+		return request.post(this.l(url)).use(req => this.makeRequest(req, json))
 	}
 
-  /**
-   * @param {String} url
-   * @return {request.Request}
-   */
+	/**
+	 * @param {String} url
+	 * @return {request.Request}
+	 */
 	get(url) {
-		return request.get(this.l(url)).use(this._makeRequest.bind(this))
+		return request.get(this.l(url)).use(this.makeRequest.bind(this))
 	}
 
-	_makeRequest(req, json = true) {
+	makeRequest(req, json = true) {
 		if (json) {
 			req.set('Content-Type', 'application/json').accept('json')
 		}
@@ -58,9 +55,13 @@ export default class HTTPClient {
 		const rawResponseThen = req.then.bind(req)
 
 		req.then = (onFulfilled, onRejected) =>
-			rawResponseThen(formatResponse.bind(this))
-				.then(onFulfilled, (...args) => {
-					onRejected && onRejected(...args)
-				})
+			rawResponseThen(formatResponse.bind(this)).then(
+				onFulfilled,
+				(...args) => {
+					if (onRejected) {
+						onRejected(...args)
+					}
+				}
+			)
 	}
 }

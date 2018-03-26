@@ -6,31 +6,27 @@ export default class UserAuth {
 	}
 
 	login(name) {
-		return this.httpClient.post('/api/login')
+		return this.httpClient
+			.post('/api/login')
 			.send({ name })
-			.then(({ user_id }) => new User(user_id, name))
+			.then(({ user_id }) => new User(user_id, name)) // eslint-disable-line
 	}
 
 	logout() {
-		return new Promise(resolve => resolve(true))
+		return this.httpClient.post('/api/logout').then(() => null)
 	}
 
 	createRoom() {
 		return this.httpClient
 			.post('/api/create_room')
-			.then(({ room_id }) => {
-				return room_id
-			})
+			.then(({ room_id }) => room_id) // eslint-disable-line
 	}
 
 	attend(roomID) {
-		const conn = new WebSocket(`ws://localhost:5432/api/ws/attend?room_id=${roomID}`);
-		conn.onclose = function (evt) {
-			console.log("websocket will be closed", evt)
-		};
-		conn.onmessage = function (evt) {
-			console.log("receive message, data=%v", evt.data)
-		};
-		return conn
+		return this.httpClient.createWebSocket(
+			`/api/ws/attend?room_id=${roomID}`,
+			evt => console.log('websocket will be closed', evt), // eslint-disable-line
+			evt => console.log('receive message', evt.data) // eslint-disable-line
+		)
 	}
 }
