@@ -10,14 +10,12 @@ type room struct {
 	editting *Editting
 }
 
-func (r *room) attend(user *User) error {
+func (r *room) attend(user *User) {
 	r.editting.Attend(user)
-	return nil
 }
 
-func (r *room) leave(user *User) error {
+func (r *room) leave(user *User) {
 	r.editting.Leave(user)
-	return nil
 }
 
 func (r *room) getUserList() []*UserEditting {

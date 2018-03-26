@@ -34,8 +34,8 @@ func NewService(port, staticPath string) *Service {
 	r.HandleFunc("/api/login", h.login)
 	r.HandleFunc("/api/create_room", h.create)
 	r.HandleFunc("/api/ws/attend", h.attend)
-	r.HandleFunc("/", h.serverHome)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(staticPath))))
+	r.HandleFunc("/", h.serverHome)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),

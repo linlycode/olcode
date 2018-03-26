@@ -15,7 +15,7 @@ type UserEditting struct {
 type Editting struct {
 	doc *Document
 
-	uMtx          sync.Mutex
+	uMtx          sync.RWMutex
 	userEdittings map[int64]*UserEditting
 }
 
@@ -32,15 +32,15 @@ func NewEditting(doc *Document, user *User) *Editting {
 
 // UserCount returns the number of users
 func (e *Editting) UserCount() int {
-	e.uMtx.Lock()
-	defer e.uMtx.Unlock()
+	e.uMtx.RLock()
+	defer e.uMtx.RUnlock()
 	return len(e.userEdittings)
 }
 
 // GetUserEditingList returns the information of all the editing users
 func (e *Editting) GetUserEditingList() []*UserEditting {
-	e.uMtx.Lock()
-	defer e.uMtx.Unlock()
+	e.uMtx.RLock()
+	defer e.uMtx.RUnlock()
 	ues := make([]*UserEditting, 0)
 	for _, ue := range e.userEdittings {
 		ues = append(ues, ue)
@@ -53,9 +53,7 @@ func (e *Editting) Attend(u *User) {
 	e.uMtx.Lock()
 	defer e.uMtx.Unlock()
 
-	if _, ok := e.userEdittings[u.ID]; !ok {
-		e.userEdittings[u.ID] = &UserEditting{User: u}
-	}
+	e.userEdittings[u.ID] = &UserEditting{User: u}
 }
 
 // Leave handles user leaving the editting
@@ -67,10 +65,8 @@ func (e *Editting) Leave(u *User) {
 
 // CursorPosition returns user's cursor position
 func (e *Editting) CursorPosition(user *User) (int, error) {
-	e.uMtx.Lock()
-	defer e.uMtx.Unlock()
-	e.doc.mtx.Lock()
-	defer e.doc.mtx.Unlock()
+	e.uMtx.RLock()
+	defer e.uMtx.RUnlock()
 
 	ue, ok := e.userEdittings[user.ID]
 	if !ok {

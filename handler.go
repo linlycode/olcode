@@ -212,10 +212,6 @@ func (h *handler) attend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := hub.room.attend(user); err != nil {
-		replyServerError(w, fmt.Sprintf("user(%v) fail to attend room", user.ID))
-		return
-	}
 	buildClientRoomConn(user, hub, w, r)
 }
 

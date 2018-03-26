@@ -63,10 +63,14 @@ func (c *clientRoomConn) processRecvMsg(msg []byte) {
 	}
 }
 
+func (c *clientRoomConn) unregister() {
+	c.hub.unregisterClientRoomConn(c)
+}
+
 func (c *clientRoomConn) readPump() {
 	defer func() {
-		c.hub.unregisterCh <- c
 		c.conn.Close()
+		c.unregister()
 		c.hub.broadcastUserList()
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
@@ -91,7 +95,7 @@ func (c *clientRoomConn) writePump() {
 	defer func() {
 		ticker.Stop()
 		c.conn.Close()
-		// FIXME: may broadcast twice
+		c.unregister()
 		c.hub.broadcastUserList()
 	}()
 

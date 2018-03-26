@@ -2,8 +2,8 @@ package olcode
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
+	"sync"
 )
 
 const (
@@ -14,10 +14,10 @@ const (
 type Hub struct {
 	room *room
 	// map[userID]conn
-	m            map[int64]*clientRoomConn
-	broadcastCh  chan *connProtocol
-	unregisterCh chan *clientRoomConn
-	destroyCh    chan struct{}
+	m           map[int64]*clientRoomConn
+	mMtx        sync.RWMutex
+	broadcastCh chan *connProtocol
+	destroyCh   chan struct{}
 }
 
 func newHub(room *room) *Hub {
@@ -32,28 +32,31 @@ func (h *Hub) getRoomID() roomID {
 	return h.room.id
 }
 
-func (h *Hub) registerClientRoomConn(conn *clientRoomConn) error {
-	log.Printf("register client room conn")
-	user := conn.user
-	if _, exist := h.m[user.ID]; exist {
-		log.Printf("client room conn has existed already, roomID=%v, userID=%v", h.room.id, user.ID)
-		return nil
+func (h *Hub) registerClientRoomConn(conn *clientRoomConn) {
+	log.Printf("register client room conn, userID=%v, roomID=%v", conn.user.ID, h.room.id)
+	h.mMtx.Lock()
+	defer h.mMtx.Unlock()
+	if _, exist := h.m[conn.user.ID]; exist {
+		log.Printf("client room conn has existed already, roomID=%v, userID=%v", h.room.id, conn.user.ID)
+		return
 	}
-
-	if err := h.room.attend(user); err != nil {
-		return fmt.Errorf("user(%v) fail to attend the room, err=%v", user.ID, err)
-	}
-
-	h.m[user.ID] = conn
-	return nil
+	h.room.attend(conn.user)
+	h.m[conn.user.ID] = conn
 }
 
 func (h *Hub) unregisterClientRoomConn(conn *clientRoomConn) {
-	// TODO: need implement
+	log.Printf("unregister client room conn, userID=%v, roomID=%v", conn.user.ID, h.room.id)
+	h.mMtx.Lock()
+	defer h.mMtx.Unlock()
+
+	h.room.leave(conn.user)
+	delete(h.m, conn.user.ID)
 }
 
 func (h *Hub) broadcastMsg(msg *connProtocol) {
 	log.Printf("broadcast message, type=%v", msg.Type())
+	h.mMtx.RLock()
+	defer h.mMtx.RUnlock()
 	for _, crConn := range h.m {
 		crConn.sendCh <- msg
 	}
