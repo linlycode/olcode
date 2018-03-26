@@ -46,6 +46,11 @@ type docInsertMsg struct {
 	Text string `json:"text"`
 }
 
+type docDeleteMsg struct {
+	Len    int  `json:"len"`
+	Before bool `json:"before"`
+}
+
 type moveCursorMsg struct {
 	Offset int `json:"offset"`
 }

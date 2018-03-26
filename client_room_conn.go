@@ -63,7 +63,7 @@ func (c *clientRoomConn) handleDocInsert(p *connProtocol) {
 		return
 	}
 
-	if err := c.hub.room.insert(inMsg.Text, c.user); err != nil {
+	if err := c.hub.room.insertText(inMsg.Text, c.user); err != nil {
 		log.Printf("fail to insert text to doc, err=%v", err)
 		return
 	}
@@ -71,7 +71,20 @@ func (c *clientRoomConn) handleDocInsert(p *connProtocol) {
 	c.hub.broadcastDocSync()
 }
 
-func (c *clientRoomConn) handleDocDelete(p *connProtocol) {}
+func (c *clientRoomConn) handleDocDelete(p *connProtocol) {
+	var delMsg docDeleteMsg
+	if err := p.UnmarshalTo(&delMsg); err != nil {
+		log.Printf("fail to unmarshal doc del message, err=%v", err)
+		return
+	}
+
+	if err := c.hub.room.deleteText(delMsg.Len, delMsg.Before, c.user); err != nil {
+		log.Printf("fail to delete text from doc, err=%v", err)
+		return
+	}
+
+	c.hub.broadcastDocSync()
+}
 
 func (c *clientRoomConn) processRecvMsg(msg []byte) {
 	p := &connProtocol{}

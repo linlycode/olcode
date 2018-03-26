@@ -30,6 +30,10 @@ func (r *room) getDocDetail() (string, map[int64]int) {
 	return r.editing.GetDetail()
 }
 
-func (r *room) insert(text string, user *User) error {
+func (r *room) insertText(text string, user *User) error {
 	return r.editing.Insert(text, user)
+}
+
+func (r *room) deleteText(n int, before bool, user *User) error {
+	return r.editing.Delete(n, before, user)
 }
