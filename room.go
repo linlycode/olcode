@@ -29,3 +29,7 @@ func (r *room) moveCursor(offset int, user *User) error {
 func (r *room) getDocDetail() (string, map[int64]int) {
 	return r.editing.GetDetail()
 }
+
+func (r *room) insert(text string, user *User) error {
+	return r.editing.Insert(text, user)
+}

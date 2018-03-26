@@ -7,8 +7,9 @@ import (
 const (
 	// send
 	msgDocSync = iota
-	msgRoomDeleted
 	msgUserList
+	// TODO: need implement
+	msgRoomDeleted
 )
 
 const (
@@ -39,6 +40,10 @@ func (c *connProtocol) Type() int {
 
 func (c *connProtocol) UnmarshalTo(v interface{}) error {
 	return json.Unmarshal([]byte(c.Data), v)
+}
+
+type docInsertMsg struct {
+	Text string `json:"text"`
 }
 
 type moveCursorMsg struct {

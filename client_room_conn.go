@@ -56,7 +56,21 @@ func (c *clientRoomConn) handleMoveCursor(p *connProtocol) {
 	c.hub.broadcastDocSync()
 }
 
-func (c *clientRoomConn) handleDocInsert(p *connProtocol) {}
+func (c *clientRoomConn) handleDocInsert(p *connProtocol) {
+	var inMsg docInsertMsg
+	if err := p.UnmarshalTo(&inMsg); err != nil {
+		log.Printf("fail to unmarshal doc insert message, err=%v", err)
+		return
+	}
+
+	if err := c.hub.room.insert(inMsg.Text, c.user); err != nil {
+		log.Printf("fail to insert text to doc, err=%v", err)
+		return
+	}
+
+	c.hub.broadcastDocSync()
+}
+
 func (c *clientRoomConn) handleDocDelete(p *connProtocol) {}
 
 func (c *clientRoomConn) processRecvMsg(msg []byte) {

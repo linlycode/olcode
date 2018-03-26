@@ -118,6 +118,7 @@ func (e *Editing) Insert(str string, user *User) error {
 	}
 
 	// update cursors
+	// FIXME: not thread-safe
 	if e.doc.Len() != n {
 		for _, u := range e.userEditings {
 			if u.CursorPos > ue.CursorPos {
