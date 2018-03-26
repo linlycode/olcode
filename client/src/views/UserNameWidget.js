@@ -21,10 +21,10 @@ class UserNameWidget extends React.Component {
 	render() {
 		const { user } = this.props
 		return user ? (
-			<span>
+			<div>
 				<span>{user.name}</span>
 				<button onClick={this.onLogoutClick}>Logout</button>
-			</span>
+			</div>
 		) : (
 			<LoginHandler onLoggedIn={this.onLoggedIn} />
 		)

@@ -11,3 +11,10 @@ export function setActors(actors) {
 		actors,
 	}
 }
+
+export function setRoom(room) {
+	return {
+		type: 'SET_ROOM',
+		room,
+	}
+}

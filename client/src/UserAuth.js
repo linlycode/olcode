@@ -15,18 +15,4 @@ export default class UserAuth {
 	logout() {
 		return this.httpClient.post('/api/logout').then(() => null)
 	}
-
-	createRoom() {
-		return this.httpClient
-			.post('/api/create_room')
-			.then(({ room_id }) => room_id) // eslint-disable-line
-	}
-
-	attend(roomID) {
-		return this.httpClient.createWebSocket(
-			`/api/ws/attend?room_id=${roomID}`,
-			evt => console.log('websocket will be closed', evt), // eslint-disable-line
-			evt => console.log('receive message', evt.data) // eslint-disable-line
-		)
-	}
 }

@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 
-import { setUser, setActors } from './actions'
+import { setUser, setActors, setRoom } from './actions'
 
 const userMapper = {
 	mapState: state => ({ user: state.user }),
@@ -16,7 +16,18 @@ const actorsMapper = {
 	}),
 }
 
-const mappers = new Map([['user', userMapper], ['actors', actorsMapper]])
+const roomMapper = {
+	mapState: state => ({ room: state.room }),
+	mapDispatch: dispatch => ({
+		setRoom: room => dispatch(setRoom(room)),
+	}),
+}
+
+const mappers = new Map([
+	['user', userMapper],
+	['actors', actorsMapper],
+	['room', roomMapper],
+])
 
 /**
  * @return {string[]}

@@ -8,6 +8,7 @@ import UserAuth from '../UserAuth'
 
 import UserNameWidget from './UserNameWidget'
 import CodeEditor from './CodeEditor'
+import RoomWidget from './RoomWidget'
 
 class MainPage extends React.Component {
 	enterRoomHandler() {
@@ -19,10 +20,8 @@ class MainPage extends React.Component {
 		const { user } = this.props
 		return (
 			<div>
-				{user && (
-					<button onClick={() => this.enterRoomHandler()}>Enter Room</button>
-				)}
 				<UserNameWidget />
+				{user && <RoomWidget />}
 				<CodeEditor />
 			</div>
 		)

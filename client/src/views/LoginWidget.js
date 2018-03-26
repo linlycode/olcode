@@ -28,7 +28,7 @@ export default class LoginWidget extends React.Component {
 	render() {
 		const { errorMessage } = this.props
 		return (
-			<span>
+			<div>
 				<input
 					name="name"
 					value={this.state.username}
@@ -38,7 +38,7 @@ export default class LoginWidget extends React.Component {
 					Login
 				</button>
 				{errorMessage && <span>{errorMessage}</span>}
-			</span>
+			</div>
 		)
 	}
 }

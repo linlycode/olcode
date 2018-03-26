@@ -19,11 +19,8 @@ export default class HTTPClient {
 		this.port = port
 	}
 
-	createWebSocket(url, onClose, onMessage) {
-		const conn = new WebSocket(`ws://${this.host}:${this.port}${url}`)
-		conn.onclose = onClose
-		conn.onmessage = onMessage
-		return conn
+	createWebSocket(url) {
+		return new WebSocket(`ws://${this.host}:${this.port}${url}`)
 	}
 
 	l(relURL) {

@@ -4,6 +4,7 @@ import HTTPClient from './HTTPClient'
 
 import { subscribe } from './store'
 import UserAuth from './UserAuth'
+import RoomManager from './RoomManager'
 
 import MainPage from './views/MainPage'
 
@@ -15,6 +16,7 @@ class App extends React.Component {
 		this.httpClient = new HTTPClient(config.host, config.port)
 		const actors = {
 			userAuth: new UserAuth(this.httpClient),
+			roomManager: new RoomManager(this.httpClient),
 		}
 		this.props.setActors(actors)
 	}
