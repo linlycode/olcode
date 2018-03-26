@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import axios from 'axios'
+import HTTPClient from './HTTPClient'
+
 
 import { subscribe } from './store'
 import UserAuth from './UserAuth'
@@ -12,10 +13,7 @@ class App extends React.Component {
 		super(props)
 		const { config } = this.props
 
-		this.httpClient = axios.create({
-			baseURL: `${config.protocol}://${config.host}:${config.port}`,
-		})
-
+		this.httpClient = new HTTPClient(config.host, config.port)
 		const actors = {
 			userAuth: new UserAuth(this.httpClient),
 		}

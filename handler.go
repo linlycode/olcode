@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path/filepath"
 )
 
 type respCode int
@@ -23,14 +24,16 @@ type response struct {
 type handler struct {
 	userStore *userStore
 	hubMgr    *HubMgr
+	homePath  string
 }
 
-func newHandler() *handler {
+func newHandler(homePath string) *handler {
 	registerSessionTypes()
 
 	return &handler{
 		userStore: newUserStore(),
 		hubMgr:    NewHubMgr(),
+		homePath:  homePath,
 	}
 }
 
@@ -163,7 +166,7 @@ func (h *handler) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.hubMgr.registerRoom(user)
+	id, err := h.hubMgr.registerHub(user)
 	if err != nil {
 		replyServerError(w, fmt.Sprintf("fail to register room, err=%v", err))
 		return
@@ -183,7 +186,7 @@ func (h *handler) attend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	vals, ok := r.URL.Query()["room_id"]
-	if !ok || len(vals) < 1 {
+	if !ok || len(vals) == 0 {
 		http.Error(w, "missing room_id parameter", http.StatusBadRequest)
 		return
 	}
@@ -209,5 +212,18 @@ func (h *handler) attend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serveWs(user, hub, w, r)
+	if err := hub.room.attend(user); err != nil {
+		replyServerError(w, fmt.Sprintf("user(%v) fail to attend room", user.ID))
+		return
+	}
+	buildClientRoomConn(user, hub, w, r)
+}
+
+func (h *handler) serverHome(w http.ResponseWriter, r *http.Request) {
+	log.Printf("query home index")
+
+	if !checkMethod(w, r, http.MethodGet) {
+		return
+	}
+	http.ServeFile(w, r, filepath.Join(h.homePath, "index.html"))
 }

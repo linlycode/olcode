@@ -2,6 +2,7 @@ package olcode
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 )
 
@@ -15,18 +16,15 @@ type Hub struct {
 	// map[userID]conn
 	m            map[int64]*clientRoomConn
 	broadcastCh  chan *connProtocol
-	registerCh   chan *clientRoomConn
 	unregisterCh chan *clientRoomConn
 	destroyCh    chan struct{}
 }
 
 func newHub(room *room) *Hub {
 	return &Hub{
-		room:         room,
-		m:            make(map[int64]*clientRoomConn),
-		broadcastCh:  make(chan *connProtocol, broadcastMsgCap),
-		registerCh:   make(chan *clientRoomConn),
-		unregisterCh: make(chan *clientRoomConn),
+		room:        room,
+		m:           make(map[int64]*clientRoomConn),
+		broadcastCh: make(chan *connProtocol, broadcastMsgCap),
 	}
 }
 
@@ -34,20 +32,20 @@ func (h *Hub) getRoomID() roomID {
 	return h.room.id
 }
 
-func (h *Hub) registerClientRoomConn(conn *clientRoomConn) {
+func (h *Hub) registerClientRoomConn(conn *clientRoomConn) error {
+	log.Printf("register client room conn")
 	user := conn.user
 	if _, exist := h.m[user.ID]; exist {
 		log.Printf("client room conn has existed already, roomID=%v, userID=%v", h.room.id, user.ID)
-		return
+		return nil
 	}
 
 	if err := h.room.attend(user); err != nil {
-		log.Printf("user(%v) fail to attend the room, err=%v", user.ID, err)
-		return
+		return fmt.Errorf("user(%v) fail to attend the room, err=%v", user.ID, err)
 	}
 
 	h.m[user.ID] = conn
-
+	return nil
 }
 
 func (h *Hub) unregisterClientRoomConn(conn *clientRoomConn) {
@@ -55,9 +53,14 @@ func (h *Hub) unregisterClientRoomConn(conn *clientRoomConn) {
 }
 
 func (h *Hub) broadcastMsg(msg *connProtocol) {
+	log.Printf("broadcast message, type=%v", msg.Type())
+	for _, crConn := range h.m {
+		crConn.sendCh <- msg
+	}
 }
 
 func (h *Hub) broadcastUserList() {
+	log.Printf("broadcast user list")
 	listData, err := json.Marshal(h.room.getUserList())
 	if err != nil {
 		log.Printf("fail to marshal user list, err=%v", err)
@@ -73,10 +76,6 @@ func (h *Hub) broadcastUserList() {
 func (h *Hub) run() {
 	for {
 		select {
-		case conn := <-h.registerCh:
-			h.registerClientRoomConn(conn)
-		case conn := <-h.unregisterCh:
-			h.unregisterClientRoomConn(conn)
 		case msg := <-h.broadcastCh:
 			h.broadcastMsg(msg)
 		case <-h.destroyCh:

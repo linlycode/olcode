@@ -7,8 +7,8 @@ import (
 
 // UserEditting contains the editting info of the user
 type UserEditting struct {
-	user      *User
-	cursorPos int
+	User      *User `json:"user"`
+	CursorPos int   `json:"cursor_pos"`
 }
 
 // Editting is the editing of a document
@@ -53,10 +53,9 @@ func (e *Editting) Attend(u *User) {
 	e.uMtx.Lock()
 	defer e.uMtx.Unlock()
 
-	if ue, ok := e.userEdittings[u.ID]; ok {
-		ue.user = u
+	if _, ok := e.userEdittings[u.ID]; !ok {
+		e.userEdittings[u.ID] = &UserEditting{User: u}
 	}
-	e.userEdittings[u.ID] = &UserEditting{user: u}
 }
 
 // Leave handles user leaving the editting
@@ -77,7 +76,7 @@ func (e *Editting) CursorPosition(user *User) (int, error) {
 	if !ok {
 		return 0, fmt.Errorf("user %d did not attend the editting", user.ID)
 	}
-	return ue.cursorPos, nil
+	return ue.CursorPos, nil
 }
 
 // MoveCursor handles the user moving the cursor
@@ -93,7 +92,7 @@ func (e *Editting) MoveCursor(pos int, user *User) error {
 	if err := e.doc.CheckOffset(pos); err != nil {
 		return err
 	}
-	ue.cursorPos = pos
+	ue.CursorPos = pos
 	return nil
 }
 
@@ -106,7 +105,7 @@ func (e *Editting) Insert(str string, user *User) error {
 	if !ok {
 		return fmt.Errorf("user %d did not attend the editting", user.ID)
 	}
-	n, err := e.doc.Insert(ue.cursorPos, str)
+	n, err := e.doc.Insert(ue.CursorPos, str)
 	if err != nil {
 		return err
 	}
@@ -114,12 +113,12 @@ func (e *Editting) Insert(str string, user *User) error {
 	// update cursors
 	if e.doc.Len() != n {
 		for _, u := range e.userEdittings {
-			if u.cursorPos > ue.cursorPos {
-				u.cursorPos += n
+			if u.CursorPos > ue.CursorPos {
+				u.CursorPos += n
 			}
 		}
 	}
-	ue.cursorPos += n
+	ue.CursorPos += n
 	return nil
 }
 
@@ -133,17 +132,17 @@ func (e *Editting) Delete(n int, before bool, user *User) error {
 		return fmt.Errorf("user %d did not attend the editting", user.ID)
 	}
 
-	begin, end, err := e.doc.Delete(ue.cursorPos, n, before)
+	begin, end, err := e.doc.Delete(ue.CursorPos, n, before)
 	if err != nil {
 		return err
 	}
 
 	// update cursors for other users
 	for _, u := range e.userEdittings {
-		if u.cursorPos >= end {
-			u.cursorPos -= n
-		} else if u.cursorPos > begin && u.cursorPos < end {
-			u.cursorPos = begin
+		if u.CursorPos >= end {
+			u.CursorPos -= n
+		} else if u.CursorPos > begin && u.CursorPos < end {
+			u.CursorPos = begin
 		}
 	}
 	return nil

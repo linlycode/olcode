@@ -8,15 +8,27 @@ import User from '../User'
 import UserNameWidget from './UserNameWidget'
 import CodeEditor from './CodeEditor'
 
-function MainPage(props) {
-	const { user } = props
-	return (
-		<div>
-			{user && <button>Enter Room</button>}
-			<UserNameWidget />
-			<CodeEditor />
-		</div>
-	)
+class MainPage extends React.Component {
+	constructor(props) {
+		super(props)
+	}
+
+	enterRoomHandler() {
+		const { userAuth } = this.props.actors;
+		userAuth.createRoom()
+			.then(roomID => userAuth.attend(roomID))
+	}
+
+	render() {
+		const { user } = this.props
+		return (
+			<div>
+				{user && <button onClick={() => this.enterRoomHandler()}>Enter Room</button>}
+				<UserNameWidget />
+				<CodeEditor />
+			</div>
+		)
+	}
 }
 
 MainPage.propTypes = {
@@ -27,4 +39,4 @@ MainPage.defaultProps = {
 	user: null,
 }
 
-export default hot(module)(subscribe(['user'])(MainPage))
+export default hot(module)(subscribe(['user', 'actors'])(MainPage))
