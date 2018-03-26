@@ -123,10 +123,10 @@ class CodeEditor extends React.Component {
 		const lines = contentTolines(content)
 
 		const { user } = this.props
-		if (user && user.id in cursors) {
+		if (user && `${user.id}` in cursors) {
 			// const pos = offsetToPos(cursors[user.id])
 			// this.editor.moveCursorTo(pos.row, pos.column)
-			delete cursors[user.id]  // eslint-disable-line
+			delete cursors[`${user.id}`]  // eslint-disable-line
 		}
 
 		const peerCursors = Object.keys(cursors).map(userID => {
@@ -160,9 +160,6 @@ class CodeEditor extends React.Component {
 					ref={e => {
 						if (e) {
 							this.editor = e.editor
-							console.log('editor set')
-						} else {
-							console.error('editor ref is', e)
 						}
 					}}
 					value={this.state.text}
@@ -188,4 +185,4 @@ CodeEditor.defaultProps = {
 	room: null,
 }
 
-export default subscribe(['room'])(CodeEditor)
+export default subscribe(['user', 'room'])(CodeEditor)

@@ -8,6 +8,15 @@ import { subscribe } from '../store'
 import LoginHandler from './LoginHandler'
 
 class UserNameWidget extends React.Component {
+	componentDidMount() {
+		if (!this.props.user) {
+			const { userAuth } = this.props.actors
+			userAuth.loginFromCookie().then(user => {
+				this.props.setUser(user)
+			})
+		}
+	}
+
 	onLoggedIn = user => {
 		this.props.setUser(user)
 	}

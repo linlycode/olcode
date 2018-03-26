@@ -113,11 +113,41 @@ type loginRequest struct {
 }
 
 type loginResponse struct {
-	UserID int64 `json:"user_id"`
+	UserID int64  `json:"user_id"`
+	Name   string `json:"name"`
 }
 
 func (h *handler) login(w http.ResponseWriter, r *http.Request) {
 	log.Printf("login")
+
+	session, err := getSession(r)
+	if err != nil {
+		replyServerError(w, fmt.Sprintf("fail to get session, %s", err))
+		return
+	}
+
+	if r.Method == http.MethodGet {
+		u, ok := session.Values["user"]
+		if !ok || u == nil {
+			reply(w, notLoggedIn, nil)
+			return
+		}
+		if user, ok := u.(*User); ok {
+			if _, ok := h.userStore.users[user.ID]; !ok {
+				reply(w, notLoggedIn, nil)
+
+				delete(session.Values, "user")
+				if err := session.Save(r, w); err != nil {
+					replyServerError(w, fmt.Sprintf("failed to save session, %s", err))
+				}
+				return
+			}
+			reply(w, success, loginResponse{UserID: user.ID, Name: user.Name})
+		} else {
+			replyServerError(w, fmt.Sprintf("user in session is not *User, session[user]: %v", u))
+		}
+		return
+	}
 
 	if !checkMethod(w, r, http.MethodPost) {
 		return
@@ -125,12 +155,6 @@ func (h *handler) login(w http.ResponseWriter, r *http.Request) {
 
 	var req loginRequest
 	if ok := parseRequest(w, r, &req); !ok {
-		return
-	}
-
-	session, err := getSession(r)
-	if err != nil {
-		replyServerError(w, fmt.Sprintf("fail to get session, %s", err))
 		return
 	}
 
@@ -142,7 +166,7 @@ func (h *handler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reply(w, success, loginResponse{UserID: user.ID})
+	reply(w, success, loginResponse{UserID: user.ID, Name: user.Name})
 }
 
 type createResponse struct {
