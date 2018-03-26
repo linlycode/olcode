@@ -48,6 +48,17 @@ func (e *Editing) GetUserEditingList() []*UserEditing {
 	return ues
 }
 
+// GetDetail returns the details (content, userEditing)
+func (e *Editing) GetDetail() (string, []*UserEditing) {
+	e.uMtx.RLock()
+	defer e.uMtx.RUnlock()
+	ues := make([]*UserEditing, 0)
+	for _, ue := range e.userEdittings {
+		ues = append(ues, ue)
+	}
+	return e.doc.Content(), ues
+}
+
 // Attend handles user attending the editing
 func (e *Editing) Attend(u *User) {
 	e.uMtx.Lock()

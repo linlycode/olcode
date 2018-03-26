@@ -33,9 +33,9 @@ func (m *HubMgr) registerHub(user *User) (roomID, error) {
 	defer m.mtx.Unlock()
 
 	r := &room{
-		id:       id,
-		creator:  user,
-		editting: NewEditing(&Document{}, user),
+		id:      id,
+		creator: user,
+		editing: NewEditing(&Document{}, user),
 	}
 
 	h := newHub(r)

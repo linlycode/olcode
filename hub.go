@@ -62,6 +62,7 @@ func (h *Hub) broadcastMsg(msg *connProtocol) {
 	}
 }
 
+// TODO: broadcast to everyone excluding sender
 func (h *Hub) broadcastUserList() {
 	log.Printf("broadcast user list")
 	listData, err := json.Marshal(h.room.getUserList())
@@ -76,8 +77,23 @@ func (h *Hub) broadcastUserList() {
 	}
 }
 
+// TODO: broadcast to everyone excluding sender
 func (h *Hub) broadcastDocDetail() {
+	log.Printf("broadcast doc detail")
+	docDetail, err := json.Marshal(h.room.getDocDetail())
+	if err != nil {
+		log.Printf("fail to marsh doc detail, err=%v", err)
+		return
+	}
 
+	h.broadcastCh <- &connProtocol{
+		MsgType: msgDocDetail,
+		Data:    string(docDetail),
+	}
+}
+
+func (h *Hub) stopRun() {
+	close(h.destroyCh)
 }
 
 func (h *Hub) run() {

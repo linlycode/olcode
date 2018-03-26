@@ -155,7 +155,7 @@ func (c *clientRoomConn) writePump() {
 				log.Printf("fail to write ping message, err=%v", err)
 				return
 			}
-			// daemon for sending doc detail
+			//TODO: daemon for sending doc detail
 		}
 	}
 }
