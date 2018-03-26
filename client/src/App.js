@@ -1,10 +1,39 @@
 import React from 'react'
-import { hot } from 'react-hot-loader'
+import PropTypes from 'prop-types'
+import axios from 'axios'
+
+import { subscribe } from './store'
+import UserAuth from './UserAuth'
 
 import MainPage from './views/MainPage'
 
-function App() {
-	return <MainPage />
+class App extends React.Component {
+	constructor(props) {
+		super(props)
+		const { config } = this.props
+
+		this.httpClient = axios.create({
+			baseURL: `${config.protocol}://${config.host}:${config.port}`,
+		})
+
+		const actors = {
+			userAuth: new UserAuth(this.httpClient),
+		}
+		this.props.setActors(actors)
+	}
+
+	render() {
+		return <MainPage />
+	}
 }
 
-export default hot(module)(App)
+App.propTypes = {
+	config: PropTypes.shape({
+		protocol: PropTypes.string.isRequired,
+		host: PropTypes.string.isRequired,
+		port: PropTypes.number.isRequired,
+	}).isRequired,
+	setActors: PropTypes.func.isRequired,
+}
+
+export default subscribe(['actors'])(App)
