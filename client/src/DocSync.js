@@ -77,11 +77,12 @@ export default class DocSync {
 	}
 
 	onMessage = e => {
-		const data = JSON.parse(e.data)
+		const d = JSON.parse(e.data)
+		const data = JSON.parse(d.data)
 
 		const { onSyncDoc, onRoomDeleted, onRoomUserListChanged } = this.callbacks
 
-		switch (data.msg_type) {
+		switch (d.msg_type) {
 			case MsgType.syncDoc:
 				onSyncDoc(data)
 				break
@@ -92,7 +93,7 @@ export default class DocSync {
 				onRoomUserListChanged(data)
 				break
 			default:
-				throw new Error('unknown msg_type', data.msg_type)
+				throw new Error('unknown msg_type', d.msg_type)
 		}
 		if (this.syncCallback) {
 			this.syncCallback()

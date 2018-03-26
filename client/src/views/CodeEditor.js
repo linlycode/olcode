@@ -51,7 +51,7 @@ function offsetToPos(lines, offset) {
 	let count = 0
 	for (let i = 0; i < lines.length; i += 1) {
 		count += lines[i].length
-		if (count > offset) {
+		if (count >= offset) {
 			return { row: i, column: lines[i].length - (count - offset) }
 		}
 	}
@@ -63,6 +63,7 @@ class CodeEditor extends React.Component {
 		super(props)
 		this.state = {
 			lang: 'plain_text',
+			text: '',
 			peerCursors: [],
 		}
 		this.editor = null
@@ -113,17 +114,18 @@ class CodeEditor extends React.Component {
 
 	onFocus = () => {}
 
-	syncDoc({ content, cursor_map: cursors }) {
+	syncDoc = ({ content, cursor_map: cursors }) => {
 		if (!this.editor) {
 			return
 		}
-		this.editor.setValue(content)
+		this.setState({ text: content })
+		// this.editor.setValue(content)
 		const lines = contentTolines(content)
 
 		const { user } = this.props
 		if (user && user.id in cursors) {
-			const pos = offsetToPos(cursors[user.id])
-			this.editor.moveCursorTo(pos.row, pos.column)
+			// const pos = offsetToPos(cursors[user.id])
+			// this.editor.moveCursorTo(pos.row, pos.column)
 			delete cursors[user.id]  // eslint-disable-line
 		}
 
@@ -155,7 +157,6 @@ class CodeEditor extends React.Component {
 					<option value="jsx">React</option>
 				</select>
 				<AceEditor
-					value="andres iniesta Lionel"
 					ref={e => {
 						if (e) {
 							this.editor = e.editor
@@ -164,6 +165,7 @@ class CodeEditor extends React.Component {
 							console.error('editor ref is', e)
 						}
 					}}
+					value={this.state.text}
 					mode={this.state.lang}
 					theme="github"
 					markers={this.state.peerCursors}
