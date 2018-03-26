@@ -41,9 +41,23 @@ func newClientRoomConn(user *User, hub *Hub, conn *websocket.Conn) *clientRoomCo
 	}
 }
 
-func (c *clientRoomConn) handleMoveCursor(p *connProtocol) {}
-func (c *clientRoomConn) handleDocInsert(p *connProtocol)  {}
-func (c *clientRoomConn) handleDocDelete(p *connProtocol)  {}
+func (c *clientRoomConn) handleMoveCursor(p *connProtocol) {
+	var mvMsg moveCursorMsg
+	if err := p.UnmarshalTo(&mvMsg); err != nil {
+		log.Printf("fail to unmarshal move cursor message, err=%v", err)
+		return
+	}
+
+	if err := c.hub.room.moveCursor(mvMsg.offset, c.user); err != nil {
+		log.Printf("fail to move cursor, err=%v", err)
+		return
+	}
+
+	c.hub.broadcastUserList()
+}
+
+func (c *clientRoomConn) handleDocInsert(p *connProtocol) {}
+func (c *clientRoomConn) handleDocDelete(p *connProtocol) {}
 
 func (c *clientRoomConn) processRecvMsg(msg []byte) {
 	p := &connProtocol{}

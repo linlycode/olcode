@@ -21,3 +21,7 @@ func (r *room) leave(user *User) {
 func (r *room) getUserList() []*UserEditting {
 	return r.editting.GetUserEditingList()
 }
+
+func (r *room) moveCursor(offset int, user *User) error {
+	return r.editting.MoveCursor(offset, user)
+}
