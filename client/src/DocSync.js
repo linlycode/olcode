@@ -40,7 +40,10 @@ export default class DocSync {
 			console.error('push when websocket is not connected')
 			return
 		}
-		this.sendJSON({ msg_type: MsgType.docInsert, text })
+		this.sendJSON({
+			msg_type: MsgType.docInsert,
+			data: JSON.stringify({ text }),
+		})
 	}
 
 	/**
@@ -52,7 +55,10 @@ export default class DocSync {
 			console.error('push when websocket is not connected')
 			return
 		}
-		this.sendJSON({ msg_type: MsgType.docDelete, before, len })
+		this.sendJSON({
+			msg_type: MsgType.docDelete,
+			data: JSON.stringify({ before, len }),
+		})
 	}
 
 	updateCursor(offset) {
@@ -60,7 +66,10 @@ export default class DocSync {
 			console.error('push when websocket is not connected')
 			return
 		}
-		this.sendJSON({ msg_type: MsgType.moveCursor, offset })
+		this.sendJSON({
+			msg_type: MsgType.moveCursor,
+			data: JSON.stringify({ offset }),
+		})
 	}
 
 	onOpen = () => {
