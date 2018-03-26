@@ -33,14 +33,14 @@ export default class DocSync {
 	}
 
 	/**
-	 * @param {String} content
+	 * @param {String} text
 	 */
-	insert(content) {
+	insert(text) {
 		if (!this.connected) {
 			console.error('push when websocket is not connected')
 			return
 		}
-		this.sendJSON({ msg_type: MsgType.docInsert, content })
+		this.sendJSON({ msg_type: MsgType.docInsert, text })
 	}
 
 	/**

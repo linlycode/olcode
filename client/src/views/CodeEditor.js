@@ -28,31 +28,31 @@ function contentTolines(content) {
 
 /**
  * @param {String[]} lines
- * @param { {row: Number, column: Number} } cursor
+ * @param { {row: Number, column: Number} } pos
  */
-function cursorToOffset(lines, cursor) {
+function posToOffset(lines, pos) {
 	let count = 0
-	if (cursor.row >= lines.length) {
+	if (pos.row >= lines.length) {
 		throw new Error('invalid row')
 	}
-	for (let i = 0; i < cursor.row; i += 1) {
+	for (let i = 0; i < pos.row; i += 1) {
 		count += lines[i].length
 	}
-	count += cursor.column
+	count += pos.column
 	return count
 }
 
 /**
  * @param {String[]} lines
  * @param {Number} offset
- * @return { {startRow: Number, startCol: Number} }
+ * @return { {row: Number, column: Number} }
  */
 function offsetToPos(lines, offset) {
 	let count = 0
 	for (let i = 0; i < lines.length; i += 1) {
 		count += lines[i].length
 		if (count > offset) {
-			return { startRow: i, startCol: lines[i].length - (count - offset) }
+			return { row: i, column: lines[i].length - (count - offset) }
 		}
 	}
 	throw new Error('invalid offset')
@@ -107,38 +107,38 @@ class CodeEditor extends React.Component {
 		}
 		const { doc } = this.editor.session
 		const lines = doc.getLines(0, doc.getLength())
-		const offset = cursorToOffset(lines, selection.getCursor())
+		const offset = posToOffset(lines, selection.getCursor())
 		room.docSync.updateCursor(offset)
 	}
 
 	onFocus = () => {}
 
-	syncDoc(editting) {
+	syncDoc({ content, cursor_map: cursors }) {
 		if (!this.editor) {
 			return
 		}
-		this.editor.setValue(editting.doc.content)
-		const lines = contentTolines(editting.doc.content)
-		const userCursors = editting.user_edittings.map(e =>
-			Object.assign(
-				{
-					userID: e.user.id,
-					className: peerCursorClassName,
-				},
-				offsetToPos(lines, e.cursor_pos)
-			)
-		)
+		this.editor.setValue(content)
+		const lines = contentTolines(content)
 
 		const { user } = this.props
-		if (user) {
-			const cursor = userCursors.find(c => c.userID === user.id)
-			if (cursor) {
-				this.editor.moveCursorTo(cursor.startRow, cursor.startCol)
-			}
+		if (user && user.id in cursors) {
+			const pos = offsetToPos(cursors[user.id])
+			this.editor.moveCursorTo(pos.startRow, pos.startCol)
+			delete cursors[user.id]  // eslint-disable-line
 		}
 
+		const peerCursors = Object.keys(cursors).map(userID => {
+			const pos = offsetToPos(lines, cursors[userID])
+			return {
+				userID,
+				className: peerCursorClassName,
+				startRow: pos.row,
+				startCol: pos.column,
+			}
+		})
+
 		this.setState({
-			peerCursors: userCursors.filter(c => !user || c.userID !== user.id),
+			peerCursors,
 		})
 	}
 
