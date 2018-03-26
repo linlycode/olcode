@@ -123,7 +123,7 @@ class CodeEditor extends React.Component {
 		const { user } = this.props
 		if (user && user.id in cursors) {
 			const pos = offsetToPos(cursors[user.id])
-			this.editor.moveCursorTo(pos.startRow, pos.startCol)
+			this.editor.moveCursorTo(pos.row, pos.column)
 			delete cursors[user.id]  // eslint-disable-line
 		}
 
