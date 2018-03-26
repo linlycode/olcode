@@ -44,15 +44,15 @@ export default class DocSync {
 	}
 
 	/**
-	 * @param {} content
+	 * @param {Number} len
 	 * @param {Boolean} before
 	 */
-	delete(content, before) {
+	delete(len, before) {
 		if (!this.connected) {
 			console.error('push when websocket is not connected')
 			return
 		}
-		this.sendJSON({ msg_type: MsgType.docDelete, before, content })
+		this.sendJSON({ msg_type: MsgType.docDelete, before, len })
 	}
 
 	updateCursor(offset) {

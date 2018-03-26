@@ -92,7 +92,7 @@ class CodeEditor extends React.Component {
 				{
 					const before =
 						this.editor.selection.getCursor().column === e.start.column
-					room.docSync.delete(content, before)
+					room.docSync.delete(content.length, before)
 				}
 				break
 			default:
