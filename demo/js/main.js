@@ -1,11 +1,27 @@
 'use strict'
 
+/** @type WebSocket*/
+let ws;
 const peerConnConfig = null
 const peerConn = new RTCPeerConnection(peerConnConfig)
 peerConn.onicecandidate = onIceCandidate
 peerConn.ondatachannel = onDataChannelCreated
 let dataChannel
 let roomID, peerID
+
+const sendButton = document.getElementById("send-button")
+const codeTextarea = document.getElementById("code")
+sendButton.onclick = () => {
+	sendMessageViaDataCh(codeTextarea.value)
+}
+
+function sendMessageViaDataCh(msg) {
+	dataChannel.send(msg)
+}
+
+function sendMessage(msgObj) {
+	ws.send(JSON.stringify(msgObj))
+}
 
 // IceCandidate will be generated from the local
 // It needs to be sent to the peer
@@ -59,7 +75,7 @@ function onLocalSessionCreated(desc) {
 		desc,
 		() => {
 			console.log('sending local desc:', peerConn.localDescription);
-			ws.send(peerConn.localDescription);
+			sendMessage(peerConn.localDescription)
 		},
 		console.log);
 }
@@ -70,6 +86,7 @@ function onDataChannelCreated({ channel }) {
 
 	channel.onopen = () => {
 		console.log('CHANNEL opened!!!');
+		codeTextarea.disabled = false
 	};
 
 	channel.onclose = () => {
@@ -77,27 +94,31 @@ function onDataChannelCreated({ channel }) {
 	}
 	channel.onmessage = ({ data }) => {
 		console.log('data channel message:', data)
+		codeTextarea.value = data
 	}
 }
 
 function InitWSConn() {
-	/** @type WebSocket*/
-	let ws;
 	const onOpen = () => {
 		console.log("ws connection opened")
-		ws.send("HELLO")
+		const token = new URLSearchParams(window.location.search).get('token')
+		if (token) {
+			ws.send(`HELLO ${token}`)
+		} else {
+			ws.send("HELLO")
+		}
 	}
 	const onError = () => {
 		console.log("ws connection error")
 	}
-	const onClose = () => {
-		console.log("ws connection close")
+	const onClose = (event) => {
+		console.log("ws connection close", event)
 	}
 
 	function onMessage(event) {
 		console.log("receive msg from server:", event.data)
 		const handleError = msg => {
-			console.error(msg)
+			console.log(msg)
 			ws.close()
 		}
 
@@ -109,23 +130,18 @@ function InitWSConn() {
 				handleError(`invalid message: ${msg}`)
 				return
 			}
-			let success
+			let _, success
 			[_, success, roomID, peerID] = msg.split(" ")
 			if (!success) {
 				handleError(`failed ack hello: ${msg}`)
 				return
 			}
 		} else if (msg.startsWith("PEER_JOINED")) {
-			const tokens = msg.split(" ")
-			if (tokens.length !== 2) {
-				handleError(`invalid message: ${msg}`)
-				return
-			}
 			startWebrtcConnection()
 		} else {
 			// we assume all the other message is used for webrtc connection
 			// including sdp/icecandidate
-			signalingMessageCallback(msg)
+			signalingMessageCallback(JSON.parse(msg))
 		}
 	}
 

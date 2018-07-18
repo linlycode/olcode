@@ -4,10 +4,10 @@ import (
 	"flag"
 	"log"
 
-	"github.com/linly/olcode/pkg/apiservice"
+	"github.com/linlycode/olcode/pkg/apiservice"
 )
 
-var port = flag.String("port", "5432", "service port")
+var port = flag.String("port", "8081", "service port")
 
 func main() {
 	flag.Parse()

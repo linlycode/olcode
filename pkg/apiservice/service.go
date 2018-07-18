@@ -8,29 +8,32 @@ import (
 )
 
 // Service is the HTTP service
-type Service struct {
+type Service interface {
+	Serve() error
+}
+
+type service struct {
 	server *http.Server
 }
 
 // NewService cretes a service
-func NewService(port string) *Service {
+func NewService(port string) Service {
 	h := newHandler()
 	r := mux.NewRouter()
 
-	r.HandleFunc("/api/create_hub", h.createHub)
-	r.HandleFunc("/api/join_hub", h.joinHub)
+	r.HandleFunc("/ws", h.serveWS)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
 		Handler: r,
 	}
 
-	return &Service{
+	return &service{
 		server: server,
 	}
 }
 
 // Serve starts the service
-func (s *Service) Serve() error {
+func (s *service) Serve() error {
 	return s.server.ListenAndServe()
 }

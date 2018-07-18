@@ -1,24 +1,44 @@
 package apiservice
 
 import (
+	"log"
 	"net/http"
 
-	"github.com/linly/olcode/pkg/wshub"
+	"github.com/gorilla/websocket"
+	"github.com/linlycode/olcode/pkg/apiservice/wsconn"
+	"github.com/linlycode/olcode/pkg/hubpkg"
 )
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024 * 1024,
+	WriteBufferSize: 1024 * 1024,
+}
 
 type handler interface {
 	// TODO: use a decorator function to process the http Response Writer & Rquest
-	createHub(http.ResponseWriter, *http.Request)
-	joinHub(http.ResponseWriter, *http.Request)
+	serveWS(http.ResponseWriter, *http.Request)
 }
 
 type h struct {
-	hm wshub.HubMgr
+	hm hubpkg.HubMgr
 }
 
 func newHandler() handler {
-	return &h{}
+	upgrader.CheckOrigin = func(r *http.Request) bool {
+		return true
+	}
+	return &h{
+		hm: hubpkg.NewHubMgr(),
+	}
 }
 
-func (*h) createHub(http.ResponseWriter, *http.Request) {}
-func (*h) joinHub(http.ResponseWriter, *http.Request)   {}
+func (h *h) serveWS(w http.ResponseWriter, r *http.Request) {
+	log.Printf("new connection from: %s\n", r.RemoteAddr)
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	ah := wsconn.NewAsyncHandler(conn, h.hm)
+	ah.AsyncRun()
+}
