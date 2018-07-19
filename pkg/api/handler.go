@@ -1,11 +1,11 @@
-package apiservice
+package api
 
 import (
 	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/linlycode/olcode/pkg/apiservice/wsconn"
+	"github.com/linlycode/olcode/pkg/api/wsconn"
 	"github.com/linlycode/olcode/pkg/hubpkg"
 )
 
