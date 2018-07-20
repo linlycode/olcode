@@ -7,7 +7,6 @@ from executor import execute
 class ENV:
     DEV = 'dev'
     PROD = 'prod'
-    pass
 
 
 # action definition
@@ -15,7 +14,6 @@ class ACTION:
     BUILD = 'build'
     RUN = 'run'
     STOP = 'stop'
-    pass
 
 
 BUILD_DIRNAME = ".build"
