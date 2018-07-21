@@ -17,14 +17,14 @@ type service struct {
 }
 
 // NewService cretes a service
-func NewService(port string) Service {
+func NewService(port int) Service {
 	h := newHandler()
 	r := mux.NewRouter()
 
 	r.HandleFunc("/ws", h.serveWS)
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%s", port),
+		Addr:    fmt.Sprintf(":%d", port),
 		Handler: r,
 	}
 
