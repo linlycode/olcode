@@ -2,7 +2,12 @@ import os
 from executor import execute
 
 
-def KillProc(pidFilePath):
+def genPidFilePath(workDir):
+    return os.path.join(workDir, 'pid')
+
+
+def KillProc(workDir):
+    pidFilePath = genPidFilePath(workDir)
     if os.path.exists(pidFilePath):
         with open(pidFilePath) as f:
             pid = f.readline()
@@ -12,19 +17,26 @@ def KillProc(pidFilePath):
                 pass
 
 
-def RerunProc(pidFilePath, command):
+def RunProc(workDir, command):
     # kill the last running process
-    KillProc(pidFilePath)
+    KillProc(workDir)
 
     # we skip this error so that the existing process
     # will be killed next time
     execute('{} &'.format(command))
 
     # find the pid and save it for killing next time
+    realCommand = command.split("&&")[-1].strip()
     res = execute(
-        'ps aux | grep "{}" | grep -v "grep"'.format(command), capture=True)
+        'ps aux | grep "{}" | grep -v "grep"'.format(realCommand), capture=True)
 
-    pid = str(res).split()[1]
+    try:
+        pid = str(res).split()[1]
+        int(pid)
+    except ValueError:
+        return False
+
+    pidFilePath = genPidFilePath(workDir)
     with open(pidFilePath, 'w') as f:
         f.write(str(pid))
 

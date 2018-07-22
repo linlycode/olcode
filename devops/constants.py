@@ -8,6 +8,14 @@ class ENV:
     DEV = 'dev'
     PROD = 'prod'
 
+    @staticmethod
+    def allEnvs():
+        return [ENV.DEV, ENV.PROD]
+
+    @staticmethod
+    def valid(env):
+        return env in ENV.allEnvs()
+
 
 # action definition
 class ACTION:
@@ -16,21 +24,18 @@ class ACTION:
     STOP = 'stop'
 
 
-BUILD_DIRNAME = ".build"
-WORK_DIRNAME = ".work"
-
-
 def GoRootDir():
     os.chdir(path.join(path.dirname(__file__), os.pardir))
 
 
-execute("mkdir -p ./{}".format(BUILD_DIRNAME))
-execute("mkdir -p ./{}".format(WORK_DIRNAME))
-
-
-def GetBuildDir():
-    return path.join(path.dirname(__file__), BUILD_DIRNAME)
+WORK_DIR = ".work"
+workDirCreated = False
 
 
 def GetWorkDir():
-    return path.join(path.dirname(__file__), WORK_DIRNAME)
+    global workDirCreated
+    wd = path.join(path.dirname(__file__), WORK_DIR)
+    if not workDirCreated:
+        execute("mkdir -p {}".format(wd))
+        workDirCreated = True
+    return wd
