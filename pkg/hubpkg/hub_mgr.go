@@ -14,17 +14,15 @@ type HubMgr interface {
 	GetHub(id int64) *Hub
 }
 
+var hubIDGen = &idgen.IDGenerator{}
+
 type hubMgr struct {
-	hm    map[int64]*Hub
-	mtx   *sync.RWMutex
-	idGen idgen.IDGen
+	hm  map[int64]*Hub
+	mtx *sync.RWMutex
 }
 
 func (h *hubMgr) GenHub() (*Hub, error) {
-	hID, err := h.idGen.GenID(idgen.HubID)
-	if err != nil {
-		return nil, err
-	}
+	hID := hubIDGen.GenerateID()
 
 	h.mtx.Lock()
 	defer h.mtx.Unlock()
@@ -45,8 +43,7 @@ func (h *hubMgr) GetHub(id int64) *Hub {
 // NewHubMgr makes new hub manager
 func NewHubMgr() HubMgr {
 	return &hubMgr{
-		hm:    make(map[int64]*Hub),
-		mtx:   &sync.RWMutex{},
-		idGen: idgen.GetIDGen(),
+		hm:  make(map[int64]*Hub),
+		mtx: &sync.RWMutex{},
 	}
 }

@@ -70,11 +70,7 @@ func (h *msgHandler) Handle(msg []byte) (handleErr error) {
 			return fmt.Errorf("fail to generate hub, err=%v", err)
 		}
 
-		peerID, err := hubpkg.NewPeerID()
-		if err != nil {
-			return fmt.Errorf("fail to generate peerID, err=%v", err)
-		}
-		peer = hubpkg.NewPeer(peerID, h.sender)
+		peer = hubpkg.NewPeer(h.sender)
 		if err := hub.AddPeer(peer); err != nil {
 			return fmt.Errorf("fail to add peer to hub, err=%d", err)
 		}

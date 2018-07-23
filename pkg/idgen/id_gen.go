@@ -1,34 +1,18 @@
 package idgen
 
-import (
-	"math/rand"
-)
+import "sync"
 
-// IDType is the type of ID
-type IDType int
-
-const (
-	// HubID denotes Hub ID type
-	HubID IDType = iota
-	// PeerID denotes Peer ID type
-	PeerID
-)
-
-// IDGen takes responsibility for generating a unique id
-type IDGen interface {
-	GenID(t IDType) (int64, error)
+type IDGenerator struct {
+	mtx sync.Mutex
+	id  int64
 }
 
-type idGen struct{}
+func (g *IDGenerator) GenerateID() int64 {
+	g.mtx.Lock()
 
-func (g *idGen) GenID(t IDType) (int64, error) {
-	return rand.Int63(), nil
-}
+	g.id += 1
+	id := g.id
 
-// single instance of id generator
-var singleIDGen = &idGen{}
-
-// GetIDGen query the signle instance IDGen
-func GetIDGen() IDGen {
-	return singleIDGen
+	g.mtx.Unlock()
+	return id
 }
