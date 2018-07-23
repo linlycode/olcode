@@ -1,0 +1,41 @@
+# Some basic agreements are as below:
+# 1. array value must not be null
+# 2. name, path, data, build, bin, run must exist
+# 3. data, build, bin, run have envs config and all the env name m-
+#    -ust be 'dev' or 'prod'
+# 4. build implementation must use `./data` directory
+#    under the workspace to store all the files in `data` directive
+
+gw:
+  name: gw
+  path: cmd/gw
+
+  data:
+    # data should be a directory under the workspace
+    dev: 
+      - cmd/gw/config/dev.yaml
+
+  build:
+    dev: go build ./cmd/gw
+  
+  bin:
+    dev:
+      - ./gw
+
+  run:
+    dev: ./gw -config ./data/dev.yaml
+
+web:
+  name: webclient
+  path: demo
+
+  data:
+    dev: 
+      - demo/*
+
+  build: null
+
+  bin: null
+
+  run:
+    dev: swank --path ./data &> web.log
