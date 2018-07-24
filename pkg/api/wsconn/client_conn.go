@@ -1,8 +1,9 @@
 package wsconn
 
 import (
-	"log"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/gorilla/websocket"
 	"github.com/linlycode/olcode/pkg/hubpkg"
@@ -64,18 +65,18 @@ func (cc *clientConn) readPump() {
 		msgType, msg, err := cc.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("websocket read error: %v\n", err)
+				log.WithError(err).Error("websocket reading failed")
 			}
 			break
 		}
 
 		if msgType != websocket.TextMessage {
-			log.Printf("only text message is allowed")
+			log.Error("only text message is allowed")
 			break
 		}
 
 		if err := cc.msgH.Handle(msg); err != nil {
-			log.Printf("fail to handle msg, err=%v\n", err)
+			log.WithError(err).Error("fail to handel message")
 			return
 		}
 	}
@@ -101,23 +102,23 @@ func (cc *clientConn) writePump() {
 				return
 			}
 			if _, err := w.Write(message); err != nil {
-				log.Printf("fail to write message, err=%v", err)
+				log.WithError(err).Error("fail to write message")
 				return
 			}
 
 			if err := w.Close(); err != nil {
-				log.Printf("fail to close writer, err=%v", err)
+				log.WithError(err).Error("fail to close message writer")
 				return
 			}
 		case <-ticker.C:
 			cc.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := cc.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				log.Printf("fail to write message, err=%v", err)
+				log.WithError(err).Error("fail to write ping message")
 				return
 			}
 
 		case <-cc.closeCh:
-			log.Printf("client connection is closed")
+			log.WithFields(log.Fields{"remote-addr": cc.conn.RemoteAddr().String()}).Info("websocket connection is closed")
 			return
 		}
 	}

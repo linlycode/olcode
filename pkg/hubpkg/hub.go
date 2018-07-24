@@ -2,8 +2,9 @@ package hubpkg
 
 import (
 	"fmt"
-	"log"
 	"sync"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 // Hub is a collection of peers(now only support two peers)
@@ -26,7 +27,7 @@ func (h *Hub) Broadcast(senderID int64, msg []byte) error {
 		}
 		if err := p.Send(msg); err != nil {
 			rErr = err
-			log.Printf("fail to send msg, peer#%d -> peer#%d, err=%v\n", senderID, id, err)
+			log.WithError(err).Errorf("fail to send msg from peer#%d -> peer#%d", senderID, id)
 		}
 	}
 
