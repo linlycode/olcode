@@ -3,7 +3,8 @@ package main
 import (
 	"flag"
 	"io/ioutil"
-	"log"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/linlycode/olcode/pkg/api"
 	"github.com/linlycode/olcode/pkg/common"
