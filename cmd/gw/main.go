@@ -22,6 +22,6 @@ func main() {
 	log.Infof("serve on port %d", c.Port)
 	s := api.NewService(c.Port)
 	if err := s.Serve(); err != nil {
-		log.Infof("server stopped, err=%v", err)
+		log.WithError(err).Error("server stopped")
 	}
 }
