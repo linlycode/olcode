@@ -3,9 +3,10 @@ package wsconn
 import (
 	"fmt"
 	"io"
-	"log"
 	"strconv"
 	"strings"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/linlycode/olcode/pkg/common"
 	"github.com/linlycode/olcode/pkg/hubpkg"
@@ -32,7 +33,7 @@ func (h *msgHandler) ackHello(success bool) error {
 func (h *msgHandler) notifyJoined() {
 	common.Assert(h.hub != nil)
 	if err := h.hub.Broadcast(h.peer.ID, []byte(fmt.Sprintf("PEER_JOINED"))); err != nil {
-		log.Printf("fail to broadcast, close the sender, err=%v", err)
+		log.WithError(err).Error("fail to broadcast, sender will be closed")
 		h.sender.Close()
 	}
 }

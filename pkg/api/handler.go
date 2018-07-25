@@ -1,8 +1,9 @@
 package api
 
 import (
-	"log"
 	"net/http"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/gorilla/websocket"
 	"github.com/linlycode/olcode/pkg/api/wsconn"
@@ -33,10 +34,10 @@ func newHandler() handler {
 }
 
 func (h *h) serveWS(w http.ResponseWriter, r *http.Request) {
-	log.Printf("new connection from: %s\n", r.RemoteAddr)
+	log.Infof("new connection from: %s", r.RemoteAddr)
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		log.WithError(err).Error("fail to upgrage http request")
 		return
 	}
 	ah := wsconn.NewAsyncHandler(conn, h.hm)

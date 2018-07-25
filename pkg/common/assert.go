@@ -1,6 +1,6 @@
 package common
 
-import "log"
+import log "github.com/Sirupsen/logrus"
 
 // Assertf checks cond and panic with passed error message if cond is not fulfilled
 func Assertf(cond bool, format string, v ...interface{}) {

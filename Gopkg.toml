@@ -29,10 +29,18 @@
   name = "github.com/gorilla/mux"
   version = "1.6.2"
 
+[[constraint]]
+  name = "github.com/gorilla/websocket"
+  version = "1.2.0"
+
+[[constraint]]
+  name = "gopkg.in/yaml.v2"
+  version = "2.2.1"
+
 [prune]
   go-tests = true
   unused-packages = true
 
 [[constraint]]
-  name = "gopkg.in/yaml.v2"
-  version = "2.2.1"
+  name = "github.com/Sirupsen/logrus"
+  version = "1.0.6"

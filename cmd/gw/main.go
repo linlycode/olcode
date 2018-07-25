@@ -3,7 +3,8 @@ package main
 import (
 	"flag"
 	"io/ioutil"
-	"log"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/linlycode/olcode/pkg/api"
 	"github.com/linlycode/olcode/pkg/common"
@@ -18,9 +19,9 @@ func main() {
 	c, err := loadConfig(configData)
 	common.Assertf(err == nil, "fail to load config, err=%v", err)
 
-	log.Printf("serve on port %d", c.Port)
+	log.Infof("serve on port %d", c.Port)
 	s := api.NewService(c.Port)
 	if err := s.Serve(); err != nil {
-		log.Printf("server stopped, err=%v", err)
+		log.WithError(err).Error("server stopped")
 	}
 }
