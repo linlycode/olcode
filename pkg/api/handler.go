@@ -6,8 +6,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/gorilla/websocket"
-	"github.com/linlycode/olcode/pkg/api/wsconn"
 	"github.com/linlycode/olcode/pkg/hubpkg"
+	"github.com/linlycode/olcode/pkg/ws"
 )
 
 var upgrader = websocket.Upgrader{
@@ -40,6 +40,6 @@ func (h *h) serveWS(w http.ResponseWriter, r *http.Request) {
 		log.WithError(err).Error("fail to upgrage http request")
 		return
 	}
-	ah := wsconn.NewAsyncHandler(conn, h.hm)
+	ah := ws.NewAsyncHandler(conn, h.hm)
 	ah.AsyncRun()
 }

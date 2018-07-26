@@ -1,4 +1,4 @@
-package wsconn
+package ws
 
 import (
 	"fmt"
