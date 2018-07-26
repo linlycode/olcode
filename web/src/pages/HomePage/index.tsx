@@ -1,5 +1,5 @@
 import * as React from 'react'
-import './App.css'
+import './App.less'
 
 class App extends React.Component {
 	public render() {

@@ -1,11 +1,12 @@
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-import App from './App'
-import './index.css'
-import registerServiceWorker from './registerServiceWorker'
+import dva from 'dva'
+import './index.less'
+import Router from './Router'
 
-ReactDOM.render(
-	<App />,
-	document.getElementById('root') as HTMLElement
-)
-registerServiceWorker()
+const app = dva()
+
+//  Model
+// app.model(require('./models/example').default);
+
+app.router(Router)
+app.start('#root')
+
