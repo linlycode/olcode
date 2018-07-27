@@ -4,6 +4,8 @@ from constants import ACTION, ENV
 from config import Config, ServiceConfig
 from service import Service
 
+import constants
+
 parser = OptionParser()
 parser.add_option('-e', '--env', dest='env', default='dev',
                   help='ENV should be [dev|prod]',
@@ -45,7 +47,7 @@ def succeedPrint(s):
 
 def run():
     if options.workspace is not None:
-        constants.WORK_DIRNAME = options.workspace
+        constants.WORK_DIR = options.workspace
 
     if not ENV.valid(options.env):
         print "invalid env=", options.env, ", must in ", ENV.allEnvs()
@@ -69,7 +71,7 @@ def run():
                 failPrint("(*2/2)fail to deploy:{}".format(s.name()))
                 return
             else:
-                succeedPrint("(2/2)succeed to deply:{}".format(s.name()))
+                succeedPrint("(2/2)succeed to deploy:{}".format(s.name()))
 
     elif options.action == ACTION.RUN:
         for s in services:
