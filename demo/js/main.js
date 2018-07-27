@@ -2,7 +2,16 @@
 
 /** @type WebSocket*/
 let ws;
-const peerConnConfig = null
+const peerConnConfig = {
+    iceServers: [
+      {
+        urls: 'turn:39.105.142.163',
+        username: 'demo',
+        credential: 'demotoken2018',
+      },
+    ],
+}
+
 const peerConn = new RTCPeerConnection(peerConnConfig)
 peerConn.onicecandidate = onIceCandidate
 peerConn.ondatachannel = onDataChannelCreated
@@ -32,7 +41,7 @@ function onIceCandidate(event) {
 			type: 'candidate',
 			label: event.candidate.sdpMLineIndex,
 			id: event.candidate.sdpMid,
-			candidate: event.candidate.candidate
+			candidate: event.candidate
 		})
 	} else {
 		console.log('End of candidates.')
@@ -54,9 +63,7 @@ function signalingMessageCallback(message) {
 			() => { },
 			console.log)
 	} else if (message.type === 'candidate') {
-		peerConn.addIceCandidate(new RTCIceCandidate({
-			candidate: message.candidate
-		}))
+		peerConn.addIceCandidate(new RTCIceCandidate(message.candidate))
 	}
 }
 
