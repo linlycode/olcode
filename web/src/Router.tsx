@@ -1,9 +1,10 @@
+import { RouterAPI } from 'dva'
 import { Route, Router, Switch } from 'dva/router'
 import * as React from 'react'
 import HomePage from './pages/HomePage/index'
 
 
-function RouterConfig({ history }: any) {
+function RouterConfig({ history }: RouterAPI) {
 	return (
 		<Router history={history}>
 			<Switch>
