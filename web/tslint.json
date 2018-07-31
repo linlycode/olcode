@@ -1,5 +1,9 @@
 {
-	"extends": ["tslint:recommended", "tslint-react", "tslint-config-prettier"],
+	"extends": [
+		"tslint:recommended",
+		"tslint-react",
+		"tslint-config-prettier"
+	],
 	"linterOptions": {
 		"exclude": [
 			"config/**/*.js",
@@ -9,8 +13,19 @@
 	"rules": {
 		"eofline": true,
 		"no-trailing-whitespace": true,
-		"linebreak-style": [true, "LF"],
-		"indent": [true, "tabs", 2],
-		"semicolon": [true, "never"]
+		"linebreak-style": [
+			true,
+			"LF"
+		],
+		"indent": [
+			true,
+			"tabs",
+			2
+		],
+		"semicolon": [
+			true,
+			"never"
+		],
+		"interface-name": false,
 	}
 }
