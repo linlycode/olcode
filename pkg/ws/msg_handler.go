@@ -26,7 +26,13 @@ func (h *msgHandler) ackHello(success bool) error {
 	if success {
 		successInt = 1
 	}
-	_, err := h.sender.Write([]byte(fmt.Sprintf("ACKHELLO %d %d %d", successInt, h.hub.ID, h.peer.ID)))
+	var hubID, peerID int64
+	if success {
+		hubID, peerID = h.hub.ID, h.peer.ID
+	} else {
+		hubID, peerID = -1, -1
+	}
+	_, err := h.sender.Write([]byte(fmt.Sprintf("ACKHELLO %d %d %d", successInt, hubID, peerID)))
 	return err
 }
 
