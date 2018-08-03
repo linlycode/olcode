@@ -1,17 +1,18 @@
-import "webrtc-adapter"
+import 'webrtc-adapter'
 
 export interface Sender {
 	send(msg: string): boolean
 }
 
-export interface dataChanCallbacks {
-	onopen: EventHandler | null;
-	onmessage: (event: MessageEvent) => void | null;
-	onerror: (event: ErrorEvent) => void | null;
-	onclose: EventHandler | null;
+export interface DataChanCallbacks {
+	onopen: EventHandler | null
+	onmessage: (event: MessageEvent) => void | null
+	onerror: (event: ErrorEvent) => void | null
+	onclose: EventHandler | null
 }
 
 export interface IPeerConn {
+	setSender(sender: Sender): void
 	connect(): void
 	sendData(msg: string): boolean
 	closeDataChan(): void
@@ -27,20 +28,20 @@ export interface IceServerConfig {
 
 export interface PeerConnConfig {
 	iceServer: IceServerConfig
-	dataChCallbacks: dataChanCallbacks
+	dataChCallbacks: DataChanCallbacks
 }
-
 
 class PeerConn implements IPeerConn {
 	private pc: RTCPeerConnection
+	// sender accessible if connect is called
 	private sender: Sender
 	private config: PeerConnConfig
 	private dataCh: RTCDataChannel | null
-	constructor(c: PeerConnConfig, sender: Sender) {
-		this.sender = sender
+	constructor(c: PeerConnConfig) {
 		this.config = c
+		console.log(c.iceServer)
 		this.pc = new RTCPeerConnection({
-			iceServers: [c.iceServer]
+			iceServers: [c.iceServer],
 		})
 		this.pc.onicecandidate = ev => this.onIceCandidate(ev)
 		this.pc.ondatachannel = ({ channel }) => this.onDataChCreated(channel)
@@ -56,12 +57,12 @@ class PeerConn implements IPeerConn {
 		switch (message.type) {
 			case "offer":
 				console.log('Got offer. Sending answer to peer.')
-				this.pc.setRemoteDescription(message, () => { }, console.log)
+				this.pc.setRemoteDescription(message, () => null, console.log)
 				this.pc.createAnswer().then((answer) => this.onLocalSessionCreated(answer))
 				break
 			case "answer":
 				console.log('Got answer.')
-				this.pc.setRemoteDescription(message, () => { }, console.log)
+				this.pc.setRemoteDescription(message, () => null, console.log)
 				break
 			default:
 				return false
@@ -69,11 +70,16 @@ class PeerConn implements IPeerConn {
 		return true
 	}
 
+	public setSender(sender: Sender): void {
+		this.sender = sender
+	}
+
 	public connect(): void {
+		// createDataChannel must be called before createOffer
+		this.onDataChCreated(this.pc.createDataChannel("code"))
 		this.pc.createOffer().then((offer: RTCSessionDescriptionInit) => {
 			this.onLocalSessionCreated(offer)
 		})
-		this.onDataChCreated(this.pc.createDataChannel("code"))
 	}
 
 
@@ -94,8 +100,9 @@ class PeerConn implements IPeerConn {
 	}
 
 	private onDataChCreated(ch: RTCDataChannel): void {
+		console.log("data channel created")
 		this.dataCh = ch
-		const emptyFunc = () => { }
+		const emptyFunc = () => null
 		const cbs = this.config.dataChCallbacks
 
 		this.dataCh.onopen = cbs.onopen || emptyFunc
@@ -109,14 +116,14 @@ class PeerConn implements IPeerConn {
 	}
 
 	private onLocalSessionCreated(desc: RTCSessionDescriptionInit) {
-		console.log('local session created:', desc);
+		console.log('local session created:', desc)
 		this.pc.setLocalDescription(
 			desc,
 			() => {
-				console.log('sending local desc:', this.pc.localDescription);
+				console.log('sending local desc:', this.pc.localDescription)
 				this.notifyPeer(this.pc.localDescription)
 			},
-			console.log);
+			console.log)
 	}
 
 	// IceCandidate will be generated from the local
@@ -128,14 +135,14 @@ class PeerConn implements IPeerConn {
 			return
 		}
 		this.notifyPeer({
+			candidate: event.candidate.candidate,
+			sdpMLineIndex: event.candidate.sdpMLineIndex,
+			sdpMid: event.candidate.sdpMid,
 			type: 'candidate',
-			label: event.candidate.sdpMLineIndex,
-			id: event.candidate.sdpMid,
-			candidate: event.candidate
 		})
 	}
 }
 
-export default function MakePeerConnection(c: PeerConnConfig, sender: Sender): IPeerConn {
-	return new PeerConn(c, sender)
+export default function MakePeerConnection(c: PeerConnConfig): IPeerConn {
+	return new PeerConn(c)
 }

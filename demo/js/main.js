@@ -3,13 +3,13 @@
 /** @type WebSocket*/
 let ws;
 const peerConnConfig = {
-    iceServers: [
-      {
-        urls: 'turn:39.105.142.163',
-        username: 'demo',
-        credential: 'demotoken2018',
-      },
-    ],
+	iceServers: [
+		{
+			urls: 'turn:39.105.142.163',
+			username: 'demo',
+			credential: 'demotoken2018',
+		},
+	],
 }
 
 const peerConn = new RTCPeerConnection(peerConnConfig)
