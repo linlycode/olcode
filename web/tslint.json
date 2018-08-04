@@ -27,5 +27,7 @@
 			"never"
 		],
 		"interface-name": false,
+		// TODO: remove this rule
+		"no-console": false
 	}
 }
