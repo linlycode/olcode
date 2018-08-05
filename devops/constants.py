@@ -2,6 +2,7 @@ import os
 from os import path
 from executor import execute
 
+ALL_SERVICES = 'all'
 
 # env definition
 class ENV:
