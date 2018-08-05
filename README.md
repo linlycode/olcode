@@ -35,12 +35,12 @@ If you want to start developing now, just follows the steps to prepare a develop
 cd olcode
 dep ensure
 cd devops
-pip install -r requirements
-python dev.py -t run
+pip install -r requirements.txt
+python dev.py -t run -s gw
 ```
 
 ### run webclient dev server
 ```
-cd olcode
+cd olcode/web
 yarn install && yarn start
 ```
