@@ -1,5 +1,5 @@
 // TODO: add global symbol for root path
-import MakePeerConnection, { DataChanCallbacks, IceServerConfig, IPeerConn, PeerConnConfig, Sender } from "../infra/peerconn"
+import MakePeerConnection, { DataChanCallbacks, IceServerConfig, IPeerConn, PeerConnConfig, Sender } from "src/infra/peerconn"
 
 // TODO: save this to particular config file
 const iConfig: IceServerConfig = {

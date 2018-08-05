@@ -5,3 +5,4 @@ dist/
 .vscode
 vendor
 gw
+*.less.d.ts
