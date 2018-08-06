@@ -87,7 +87,7 @@ def run():
             else:
                 succeedPrint("(1/3)succeed to build:{}".format(s.name()))
 
-            if s.deploy is False:
+            if s.deploy() is False:
                 failPrint("(*2/3)fail to deploy:{}".format(s.name()))
                 return
             else:
