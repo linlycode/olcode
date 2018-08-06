@@ -179,7 +179,7 @@ module.exports = {
                   modules: true,
                   namedExport: true,
                   camelCase: true,
-                  localIdentName: "[local]_[hash:base64:5]"
+                  localIdentName: '[local]_[hash:base64:5]'
                 }
               },
               {

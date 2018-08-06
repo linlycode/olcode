@@ -200,7 +200,7 @@ module.exports = {
                         namedExport: true,
                         camelCase: true,
                         minimize: true,
-                        localIdentName: "[local]_[hash:base64:5]"
+                        localIdentName: '[local]_[hash:base64:5]'
                       }
                     },
                     {
