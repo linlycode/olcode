@@ -194,12 +194,14 @@ module.exports = {
                   },
                   use: [
                     {
-                      loader: require.resolve('css-loader'),
+                      loader: require.resolve('typings-for-css-modules-loader'),
                       options: {
-                        importLoaders: 1,
+                        modules: true,
+                        namedExport: true,
+                        camelCase: true,
                         minimize: true,
-                        sourceMap: shouldUseSourceMap,
-                      },
+                        localIdentName: '[local]_[hash:base64:5]'
+                      }
                     },
                     {
                       loader: require.resolve('less-loader'),

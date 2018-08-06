@@ -1,7 +1,8 @@
 import * as React from 'react'
-import Conn, { ConnConfig } from '../../domain/conn'
-import { DataChanCallbacks } from '../../infra/peerconn'
-import './App.less'
+import Conn, { ConnConfig } from 'src/domain/conn'
+import { DataChanCallbacks } from 'src/infra/peerconn'
+import TopBar from 'src/views/widgets/TopBar'
+import style from './App.less'
 
 interface State {
 	codeTextareaDisabled: boolean
@@ -41,11 +42,10 @@ class App extends React.Component<any, State>{
 
 	public render() {
 		return (
-			<div className="App">
-				<header className="App-header">
-					<h1 className="App-title">Welcome olcode</h1>
-				</header>
-				<textarea id="code" disabled={this.state.codeTextareaDisabled}
+			<div className={style.app}>
+				<TopBar title="Online Code" />
+				<textarea className={style.code}
+					disabled={this.state.codeTextareaDisabled}
 					value={this.state.codeText}
 					onChange={this.updateCodeText}
 					placeholder="Press Start(or be started), enter some text, then press Send." />

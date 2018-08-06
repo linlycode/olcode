@@ -1,6 +1,6 @@
 import dva from 'dva'
 import './index.less'
-import Router from './Router'
+import Router from './views/Router'
 
 const app = dva()
 

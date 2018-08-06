@@ -174,10 +174,13 @@ module.exports = {
             use: [
               require.resolve('style-loader'),
               {
-                loader: require.resolve('css-loader'),
+                loader: require.resolve('typings-for-css-modules-loader'),
                 options: {
-                  importLoaders: 1,
-                },
+                  modules: true,
+                  namedExport: true,
+                  camelCase: true,
+                  localIdentName: '[local]_[hash:base64:5]'
+                }
               },
               {
                 loader: require.resolve('less-loader'),
