@@ -7,11 +7,11 @@ interface Props {
 	title: string
 }
 
-function TopBar ({title}: Props) {
+function TopBar({ title }: Props) {
 	return (
 		<AppBar>
 			<Toolbar>
-				<Typography  variant="title" color="inherit" >{title}</Typography>
+				<Typography variant="title" color="inherit" >{title}</Typography>
 			</Toolbar>
 		</AppBar>
 	)

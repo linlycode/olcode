@@ -1,13 +1,16 @@
 import * as React from 'react'
 import Conn, { ConnConfig } from 'src/domain/conn'
 import { DataChanCallbacks } from 'src/infra/peerconn'
+import SideBar from 'src/views/widgets/SideBar'
 import TopBar from 'src/views/widgets/TopBar'
 import style from './App.less'
 
 interface State {
 	codeTextareaDisabled: boolean
 	codeText: string
+	token: string | null
 }
+
 class App extends React.Component<any, State>{
 	private conn: Conn
 	constructor(props: any) {
@@ -21,9 +24,13 @@ class App extends React.Component<any, State>{
 		const c: ConnConfig = {
 			dataChCallbacks: cbs,
 			hostname: window.location.hostname,
+			onRecvToken: (token) => this.onRecvToken(token),
 			port: 8081,
 			// TODO: this should be passed by props
 			token: new URLSearchParams(window.location.search).get('token'),
+		}
+		if (!c.token) {
+			this.setState({ token: c.token })
 		}
 
 		console.log("token:", c.token)
@@ -32,6 +39,7 @@ class App extends React.Component<any, State>{
 		this.state = {
 			codeText: "",
 			codeTextareaDisabled: true,
+			token: null
 		}
 		this.updateCodeText = this.updateCodeText.bind(this)
 	}
@@ -49,8 +57,13 @@ class App extends React.Component<any, State>{
 					value={this.state.codeText}
 					onChange={this.updateCodeText}
 					placeholder="Press Start(or be started), enter some text, then press Send." />
+				<SideBar token={this.state.token} />
 			</div>
 		)
+	}
+
+	private onRecvToken(token: string) {
+		this.setState({ token })
 	}
 
 	private updateCodeText(ev: React.ChangeEvent<HTMLTextAreaElement>) {

@@ -14,6 +14,7 @@ export interface ConnConfig {
 	hostname: string
 	// no more details of webrtc exposed to the external
 	dataChCallbacks: DataChanCallbacks
+	onRecvToken: (token: string) => void
 }
 
 function createPeerConnectionConfig(c: ConnConfig): PeerConnConfig {
@@ -92,6 +93,7 @@ export default class Conn implements Sender {
 				handleError(`failed ack hello: ${msg}`)
 				return
 			}
+			this.c.onRecvToken(`${this.roomID}`)
 		} else if (msg.startsWith("PEER_JOINED")) {
 			this.pc.connect()
 		} else {
