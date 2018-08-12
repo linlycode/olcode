@@ -1,3 +1,4 @@
+import log from 'src/infra/log'
 // TODO: add global symbol for root path
 import MakePeerConnection, { DataChanCallbacks, IceServerConfig, IPeerConn, PeerConnConfig, Sender } from "src/infra/peerconn"
 
@@ -56,7 +57,7 @@ export default class Conn implements Sender {
 	}
 
 	private onOpen(ev: Event) {
-		console.log('ws connection opened')
+		log.info('ws connection opened')
 		if (this.c.token) {
 			this.ws.send(`HELLO ${this.c.token}`)
 		} else {
@@ -65,17 +66,17 @@ export default class Conn implements Sender {
 	}
 
 	private onError(ev: Event) {
-		console.log('ws connection error', ev)
+		log.info('ws connection error', ev)
 	}
 
 	private onClose(ev: CloseEvent) {
-		console.log('ws connection close', ev)
+		log.info('ws connection close', ev)
 	}
 
 	private onMessage(ev: MessageEvent) {
-		console.log("receive msg from server:", ev.data)
+		log.info("receive msg from server:", ev.data)
 		const handleError = (errMsg: string) => {
-			console.log(errMsg)
+			log.info(errMsg)
 			this.ws.close()
 		}
 
@@ -87,8 +88,7 @@ export default class Conn implements Sender {
 				return
 			}
 			let success
-			let _
-			[_, success, this.roomID, this.peerID] = msg.split(" ")
+			[, success, this.roomID, this.peerID] = msg.split(" ")
 			if (!success) {
 				handleError(`failed ack hello: ${msg}`)
 				return

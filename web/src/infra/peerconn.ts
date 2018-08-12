@@ -1,3 +1,4 @@
+import log from 'src/infra/log'
 import 'webrtc-adapter'
 
 export interface Sender {
@@ -39,7 +40,7 @@ class PeerConn implements IPeerConn {
 	private dataCh: RTCDataChannel | null
 	constructor(c: PeerConnConfig) {
 		this.config = c
-		console.log(c.iceServer)
+		log.info(c.iceServer)
 		this.pc = new RTCPeerConnection({
 			iceServers: [c.iceServer],
 		})
@@ -56,13 +57,13 @@ class PeerConn implements IPeerConn {
 	public handlePeerSdp(message: RTCSessionDescriptionInit): boolean {
 		switch (message.type) {
 			case "offer":
-				console.log('Got offer. Sending answer to peer.')
-				this.pc.setRemoteDescription(message, () => null, console.log)
+				log.info('Got offer. Sending answer to peer.')
+				this.pc.setRemoteDescription(message, () => null, log.info)
 				this.pc.createAnswer().then((answer) => this.onLocalSessionCreated(answer))
 				break
 			case "answer":
-				console.log('Got answer.')
-				this.pc.setRemoteDescription(message, () => null, console.log)
+				log.info('Got answer.')
+				this.pc.setRemoteDescription(message, () => null, log.info)
 				break
 			default:
 				return false
@@ -100,7 +101,7 @@ class PeerConn implements IPeerConn {
 	}
 
 	private onDataChCreated(ch: RTCDataChannel): void {
-		console.log("data channel created")
+		log.info("data channel created")
 		this.dataCh = ch
 		const emptyFunc = () => null
 		const cbs = this.config.dataChCallbacks
@@ -116,22 +117,22 @@ class PeerConn implements IPeerConn {
 	}
 
 	private onLocalSessionCreated(desc: RTCSessionDescriptionInit) {
-		console.log('local session created:', desc)
+		log.info('local session created:', desc)
 		this.pc.setLocalDescription(
 			desc,
 			() => {
-				console.log('sending local desc:', this.pc.localDescription)
+				log.info('sending local desc:', this.pc.localDescription)
 				this.notifyPeer(this.pc.localDescription)
 			},
-			console.log)
+			log.info)
 	}
 
 	// IceCandidate will be generated from the local
 	// It needs to be sent to the peer
 	private onIceCandidate(event: RTCPeerConnectionIceEventInit) {
-		console.log('icecandidate event: ', event)
+		log.info('icecandidate event: ', event)
 		if (!event.candidate) {
-			console.log('End of candidates.')
+			log.info('End of candidates.')
 			return
 		}
 		this.notifyPeer({

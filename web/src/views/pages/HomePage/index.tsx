@@ -1,5 +1,6 @@
 import * as React from 'react'
 import Conn, { ConnConfig } from 'src/domain/conn'
+import log from 'src/infra/log'
 import { DataChanCallbacks } from 'src/infra/peerconn'
 import SideBar from 'src/views/widgets/SideBar'
 import TopBar from 'src/views/widgets/TopBar'
@@ -33,7 +34,7 @@ class App extends React.Component<any, State>{
 			this.setState({ token: c.token })
 		}
 
-		console.log("token:", c.token)
+		log.info("token:", c.token)
 
 		this.conn = new Conn(c)
 		this.state = {
@@ -72,21 +73,21 @@ class App extends React.Component<any, State>{
 	}
 
 	private onDataChanOpen(ev: Event) {
-		console.log('Channel opened!!!')
+		log.info('Channel opened!!!')
 		this.setState({ codeTextareaDisabled: false })
 	}
 
 	private onDataChanClose(ev: Event) {
-		console.log('Channel closed!!!')
+		log.info('Channel closed!!!')
 	}
 
 	private onDataChanMessage(ev: MessageEvent) {
-		console.log('data channel message: ', ev.data)
+		log.info('data channel message: ', ev.data)
 		this.setState({ codeText: ev.data })
 	}
 
 	private onDataChanError(ev: ErrorEvent) {
-		console.log('data channel error: ', ev)
+		log.info('data channel error: ', ev)
 	}
 }
 
