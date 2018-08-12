@@ -2,9 +2,32 @@ import * as React from 'react'
 import Conn, { ConnConfig } from 'src/domain/conn'
 import log from 'src/infra/log'
 import { DataChanCallbacks } from 'src/infra/peerconn'
+import * as Layouts from 'src/styles/layouts'
 import SideBar from 'src/views/widgets/SideBar'
 import TopBar from 'src/views/widgets/TopBar'
-import style from './App.less'
+import styled from 'styled-components'
+
+const Wrapper = styled.div`
+	text-align: center;
+`
+
+const Content = styled.div`
+	position: fixed;
+	top: ${Layouts.topbarHeight}px;
+	right: 0;
+	bottom: 0;
+	left: ${Layouts.sideBarWidth}px;
+	overflow: auto;
+`
+
+const Textarea = styled.textarea`
+	margin: 100px;
+	width: 80%;
+	height: 300px;
+	border-color: #e6e6e6;
+	padding: 15px;
+	font-size: 14px;
+`
 
 interface State {
 	codeTextareaDisabled: boolean
@@ -30,9 +53,6 @@ class App extends React.Component<any, State>{
 			// TODO: this should be passed by props
 			token: new URLSearchParams(window.location.search).get('token'),
 		}
-		if (!c.token) {
-			this.setState({ token: c.token })
-		}
 
 		log.info("token:", c.token)
 
@@ -40,7 +60,7 @@ class App extends React.Component<any, State>{
 		this.state = {
 			codeText: "",
 			codeTextareaDisabled: true,
-			token: null
+			token: c.token || null
 		}
 		this.updateCodeText = this.updateCodeText.bind(this)
 	}
@@ -51,15 +71,17 @@ class App extends React.Component<any, State>{
 
 	public render() {
 		return (
-			<div className={style.app}>
+			<Wrapper>
 				<TopBar title="Online Code" />
-				<textarea className={style.code}
-					disabled={this.state.codeTextareaDisabled}
-					value={this.state.codeText}
-					onChange={this.updateCodeText}
-					placeholder="Press Start(or be started), enter some text, then press Send." />
 				<SideBar token={this.state.token} />
-			</div>
+				<Content>
+					<Textarea
+						disabled={this.state.codeTextareaDisabled}
+						value={this.state.codeText}
+						onChange={this.updateCodeText}
+						placeholder="Press Start(or be started), enter some text, then press Send." />
+				</Content>
+			</Wrapper>
 		)
 	}
 

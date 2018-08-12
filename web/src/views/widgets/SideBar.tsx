@@ -1,12 +1,19 @@
 import Button from '@material-ui/core/Button'
-import Card from '@material-ui/core/Card'
-import CardActions from '@material-ui/core/CardActions'
-import CardContent from '@material-ui/core/CardContent'
 import { withStyles } from '@material-ui/core/styles'
-import Typography from '@material-ui/core/Typography'
 import * as React from 'react'
+import styled from 'styled-components'
 
-import { copyToClipboard } from 'src/infra/copy'
+import Sider from '../../comps/Sider'
+
+import { copyToClipboard } from '../../infra/copy'
+
+const Token = styled.div`
+	padding: 7px 15px;
+	border: 1px solid #eee;
+	border-radius: 4px;
+	box-shadow: 0 0 10px 1px #eee inset;
+`
+
 
 const loadingText = "..."
 function getShareLink(token: string | null): string {
@@ -54,19 +61,17 @@ class SideBar extends React.Component<any, Props> {
 
 	public render() {
 		return (
-			<Card>
-				<CardContent>
-					<Typography className={this.props.classes.title} color="textSecondary">
-						{getShareLink(this.props.token)}
-					</Typography>
-				</CardContent>
-				<CardActions>
+			<Sider>
+				<Token>
+					{getShareLink(this.props.token)}
+				</Token>
+				<div>
 					<Button size="small"
 						onClick={this.onClickCopyButton}>
 						Copy
 					</Button>
-				</CardActions>
-			</Card >
+				</div>
+			</Sider >
 		)
 	}
 }

@@ -20,9 +20,6 @@
 		"fs-extra": "3.0.1",
 		"html-webpack-plugin": "2.29.0",
 		"jest": "22.4.2",
-		"less": "^3.8.0",
-		"less-loader": "^4.1.0",
-		"loglevel": "^1.6.1",
 		"object-assign": "4.1.1",
 		"postcss-flexbugs-fixes": "3.2.0",
 		"postcss-loader": "2.0.8",
@@ -34,6 +31,7 @@
 		"resolve": "1.6.0",
 		"source-map-loader": "^0.2.1",
 		"style-loader": "0.19.0",
+		"styled-components": "^3.4.2",
 		"sw-precache-webpack-plugin": "0.11.4",
 		"ts-jest": "22.0.1",
 		"ts-loader": "^2.3.7",
@@ -63,9 +61,8 @@
 		"@types/react-dom": "^16.0.6",
 		"@types/react-router": "^4.0.29",
 		"@types/webrtc": "^0.0.23",
-		"typescript": "^2.9.2",
-		"typings-for-css-modules-loader": "^1.7.0",
-		"eslint": "^5.3.0"
+		"eslint": "^5.3.0",
+		"typescript": "^2.9.2"
 	},
 	"jest": {
 		"collectCoverageFrom": [
@@ -118,7 +115,8 @@
 	},
 	"eslintConfig": {
 		"parserOptions": {
-			"ecmaVersion": 6
+			"ecmaVersion": 6,
+			"sourceType": "module"
 		},
 		"rules": {
 			"quotes": [
