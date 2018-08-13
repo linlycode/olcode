@@ -56,6 +56,10 @@ export default class Conn implements Sender {
 		this.pc.setSender(this)
 	}
 
+	public audioCall(onSucess: () => void) {
+		this.pc.audioCall(onSucess)
+	}
+
 	private onOpen(ev: Event) {
 		log.info('ws connection opened')
 		if (this.c.token) {

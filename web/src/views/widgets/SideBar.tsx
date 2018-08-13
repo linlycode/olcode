@@ -24,27 +24,19 @@ function getShareLink(token: string | null): string {
 }
 
 interface Props {
-	token: string | null
 	// TODO: it seems no a best type for classes
 	classes: any
+	onCallBtnClick: () => void
+	token: string | null
 }
 
 // TODO: fix the style
 const styles = {
-	bullet: {
-		display: 'inline-block',
-		margin: '0 2px',
-		transform: 'scale(0.8)',
+	button: {
+		margin: '0 20px 0 0'
 	},
-	card: {
-		minWidth: 275,
-	},
-	pos: {
-		marginBottom: 12,
-	},
-	title: {
-		fontSize: 14,
-		marginBottom: 16,
+	linkContainer: {
+		marginBottom: '20px',
 	},
 }
 
@@ -62,13 +54,23 @@ class SideBar extends React.Component<any, Props> {
 	public render() {
 		return (
 			<Sider>
-				<Token>
+				<Token className={this.props.classes.linkContainer}>
 					{getShareLink(this.props.token)}
 				</Token>
-				<div>
+				<div >
 					<Button size="small"
+						variant="contained"
+						color="primary"
+						className={this.props.classes.button}
 						onClick={this.onClickCopyButton}>
-						Copy
+						Copy Link
+					</Button>
+					<Button size="small"
+						variant="contained"
+						color="primary"
+						className={this.props.classes.button}
+						onClick={this.props.onCallBtnClick}>
+						Audio call
 					</Button>
 				</div>
 			</Sider >

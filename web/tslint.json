@@ -26,6 +26,6 @@
 			true,
 			"never"
 		],
-		"interface-name": false,
+		"interface-name": false
 	}
 }

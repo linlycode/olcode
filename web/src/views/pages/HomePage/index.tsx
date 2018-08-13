@@ -63,6 +63,7 @@ class App extends React.Component<any, State>{
 			token: c.token || null
 		}
 		this.updateCodeText = this.updateCodeText.bind(this)
+		this.onCallBtnClick = this.onCallBtnClick.bind(this)
 	}
 
 	public componentDidMount() {
@@ -73,7 +74,9 @@ class App extends React.Component<any, State>{
 		return (
 			<Wrapper>
 				<TopBar title="Online Code" />
-				<SideBar token={this.state.token} />
+				<SideBar token={this.state.token}
+					onCallBtnClick={this.onCallBtnClick}
+				/>
 				<Content>
 					<Textarea
 						disabled={this.state.codeTextareaDisabled}
@@ -97,6 +100,11 @@ class App extends React.Component<any, State>{
 	private onDataChanOpen(ev: Event) {
 		log.info('Channel opened!!!')
 		this.setState({ codeTextareaDisabled: false })
+	}
+
+	private onCallBtnClick() {
+		const onSuccess = () => log.info("audio call succeed")
+		this.conn.audioCall(onSuccess)
 	}
 
 	private onDataChanClose(ev: Event) {

@@ -17,6 +17,7 @@ export interface IPeerConn {
 	connect(): void
 	sendData(msg: string): boolean
 	closeDataChan(): void
+	audioCall(onSuccess: () => void): void
 	handlePeerIceCandidate(candidate: RTCIceCandidateInit): boolean
 	handlePeerSdp(message: RTCSessionDescriptionInit): boolean
 }
@@ -38,6 +39,8 @@ class PeerConn implements IPeerConn {
 	private sender: Sender
 	private config: PeerConnConfig
 	private dataCh: RTCDataChannel | null
+	private audioElem: HTMLAudioElement
+	private onRemoteAudioAdd: () => void | null
 	constructor(c: PeerConnConfig) {
 		this.config = c
 		log.info(c.iceServer)
@@ -47,28 +50,14 @@ class PeerConn implements IPeerConn {
 		this.pc.onicecandidate = ev => this.onIceCandidate(ev)
 		this.pc.ondatachannel = ({ channel }) => this.onDataChCreated(channel)
 		this.dataCh = null
-	}
 
-	public handlePeerIceCandidate(candidate: RTCIceCandidateInit): boolean {
-		this.pc.addIceCandidate(candidate)
-		return true
-	}
+		// <audio id="audio2" autoplay></audio>
+		this.audioElem = document.createElement('audio')
+		this.audioElem.setAttribute('autoplay', 'true')
+		this.audioElem.style.visibility = 'hidden'
+		document.body.appendChild(this.audioElem)
 
-	public handlePeerSdp(message: RTCSessionDescriptionInit): boolean {
-		switch (message.type) {
-			case "offer":
-				log.info('Got offer. Sending answer to peer.')
-				this.pc.setRemoteDescription(message, () => null, log.info)
-				this.pc.createAnswer().then((answer) => this.onLocalSessionCreated(answer))
-				break
-			case "answer":
-				log.info('Got answer.')
-				this.pc.setRemoteDescription(message, () => null, log.info)
-				break
-			default:
-				return false
-		}
-		return true
+		this.pc.ontrack = ev => this.onRemoteStream(ev)
 	}
 
 	public setSender(sender: Sender): void {
@@ -77,12 +66,14 @@ class PeerConn implements IPeerConn {
 
 	public connect(): void {
 		// createDataChannel must be called before createOffer
-		this.onDataChCreated(this.pc.createDataChannel("code"))
+		// TODO: add data channel should not be the default behavior of connect
+		if (!this.dataCh) {
+			this.onDataChCreated(this.pc.createDataChannel("code"))
+		}
 		this.pc.createOffer().then((offer: RTCSessionDescriptionInit) => {
 			this.onLocalSessionCreated(offer)
 		})
 	}
-
 
 	public sendData(msg: string): boolean {
 		if (this.dataCh === null) {
@@ -98,6 +89,49 @@ class PeerConn implements IPeerConn {
 			this.dataCh.close()
 			this.dataCh = null
 		}
+	}
+
+	public audioCall(onSuccess: () => void): void {
+		this.onRemoteAudioAdd = onSuccess
+		const constraint = { audio: true }
+		navigator.mediaDevices
+			.getUserMedia(constraint)
+			.then(stream => {
+				this.addAudioTracks(stream)
+				log.info("audio call is made leading to renegotiation")
+				this.connect()
+			})
+			.catch(e => log.error(e))
+	}
+
+	public handlePeerIceCandidate(candidate: RTCIceCandidateInit): boolean {
+		this.pc.addIceCandidate(candidate)
+		return true
+	}
+
+	public handlePeerSdp(message: RTCSessionDescriptionInit): boolean {
+		switch (message.type) {
+			case "offer":
+				log.info('Got offer. Sending answer to peer.')
+				this.pc.setRemoteDescription(message, () => null, log.info)
+				const reply = () => this.pc.createAnswer().then((answer) => this.onLocalSessionCreated(answer))
+
+				// found audio tracks in offer sdp
+				// an answer with audio information should be generated
+				if (message.sdp && message.sdp.indexOf('audio') >= 0) {
+					this.attachAudio(reply)
+				} else {
+					reply()
+				}
+				break
+			case "answer":
+				log.info('Got answer.')
+				this.pc.setRemoteDescription(message, () => null, log.info)
+				break
+			default:
+				return false
+		}
+		return true
 	}
 
 	private onDataChCreated(ch: RTCDataChannel): void {
@@ -141,6 +175,38 @@ class PeerConn implements IPeerConn {
 			sdpMid: event.candidate.sdpMid,
 			type: 'candidate',
 		})
+	}
+
+	private onRemoteStream(ev: RTCTrackEvent) {
+		this.audioElem.srcObject = ev.streams[0]
+		if (this.onRemoteAudioAdd) {
+			this.onRemoteAudioAdd()
+		}
+	}
+
+	private addAudioTracks(stream: MediaStream): boolean {
+		const tracks = stream.getAudioTracks()
+		if (tracks.length <= 0) {
+			log.error('fail to get audio tracks from stream')
+			return false
+		}
+
+		log.info('will use audio track:', tracks[0].label)
+		stream.getTracks().forEach(track => this.pc.addTrack(track))
+		return true
+	}
+
+	private attachAudio(onAttached: () => void) {
+		const constraint = { audio: true }
+		navigator.mediaDevices
+			.getUserMedia(constraint)
+			.then(stream => {
+				// TODO: so may be failed here without external awareness
+				if (this.addAudioTracks(stream)) {
+					onAttached()
+				}
+			})
+			.catch(e => log.error("fail to append audio track"))
 	}
 }
 
