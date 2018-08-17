@@ -26,7 +26,12 @@ def RunProc(workDir, command):
     execute('{} &'.format(command))
 
     # find the pid and save it for killing next time
+    # e.g., "mkdir gw && cd gw && ./gw -config ./data/dev.yaml &> gw.log"
     realCommand = command.split("&&")[-1].strip()
+    logIndex = realCommand.find('&>')
+    if logIndex > 0:
+        realCommand = realCommand[:logIndex]
+
     res = execute(
         'ps aux | grep "{}" | grep -v "grep"'.format(realCommand), capture=True)
 
