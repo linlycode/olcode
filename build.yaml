@@ -41,7 +41,7 @@ web:
 
   build: 
     dev: cd web && yarn build
-    prod: cd web && yarn build
+    prod: cd web && yarn build --prod
 
   bin:
     dev:
