@@ -26,6 +26,9 @@ class Service(object):
         if not execute('mkdir -p {}'.format(self.workDir())):
             return False
 
+        if not execute('rm -rf {0} && mkdir -p {0}'.format(self.workDir())):
+            return False
+
         dataFiles = " ".join(self.c.data())
         if len(dataFiles) != 0:
             if not execute('mkdir -p {1}/{2} && cp -r {0} {1}/{2}'
@@ -34,9 +37,10 @@ class Service(object):
 
         targetFiles = " ".join(self.c.bins())
         if len(targetFiles) != 0:
-            if not execute('mv {} {}'.format(targetFiles, self.workDir())):
+            if not execute('cp -r {} {}'.format(targetFiles, self.workDir())):
                 return False
 
+        execute('rm -rf {}'.format(targetFiles))
         return True
 
     def run(self):

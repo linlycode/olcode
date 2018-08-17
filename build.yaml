@@ -12,30 +12,43 @@ gw:
 
   data:
     # data should be a directory under the workspace
-    dev: 
+    dev:
+      - cmd/gw/config/dev.yaml
+    prod:
       - cmd/gw/config/dev.yaml
 
   build:
     dev: go build ./cmd/gw
+    prod: go build ./cmd/gw
   
   bin:
     dev:
       - ./gw
+    prod:
+      - ./gw
 
   run:
-    dev: ./gw -config ./data/dev.yaml
+    dev: ./gw -config ./data/dev.yaml &> gw.log
+    prod: ./gw -config ./data/dev.yaml &> gw.log
 
 web:
   name: webclient
-  path: demo
+  path: web
 
   data:
-    dev: 
-      - demo/*
+    dev: []
+    prod: []
 
-  build: null
+  build: 
+    dev: cd web && yarn build
+    prod: cd web && yarn build --prod
 
-  bin: null
+  bin:
+    dev:
+      - web/build/*
+    prod:
+      - web/build/*
 
   run:
-    dev: swank --path ./data &> web.log
+    dev: swank --path ./ &> web.log
+    # prod env nginx is used to host the static files 
