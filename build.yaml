@@ -51,4 +51,4 @@ web:
 
   run:
     dev: swank --path ./ &> web.log
-    prod: swank --path ./ &> web.log
+    prod: swank -p 8001 --path ./ &> web.log
