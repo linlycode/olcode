@@ -51,4 +51,4 @@ web:
 
   run:
     dev: swank --path ./ &> web.log
-    prod: swank -p 8001 --path ./ &> web.log
+    # prod env nginx is used to host the static files 
