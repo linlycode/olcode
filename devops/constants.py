@@ -22,6 +22,7 @@ class ENV:
 # action definition
 class ACTION:
     BUILD = 'build'
+    DEPLOY = 'deploy'
     RUN = 'run'
     STOP = 'stop'
 

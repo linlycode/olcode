@@ -11,7 +11,7 @@ parser.add_option('-e', '--env', dest='env', default=ENV.DEV,
                   help='ENV should be [dev|prod]',
                   metavar='ENV')
 parser.add_option('-t', '--action', dest='action', default=ACTION.RUN,
-                  help='ACTION should be [build|run|stop]',
+                  help='ACTION should be [build|deply|run|stop]',
                   metavar="ACTION")
 parser.add_option('-s', '--service', dest='sname', default=ALL_SERVICES,
                   help='SERVICE should be [all|gw|demo|...]',
@@ -66,6 +66,22 @@ def run():
                 continue
             if s.build() is False:
                 # TODO: prefer smarter way
+                failPrint("(*1/2)fail to build:{}".format(s.name()))
+                return
+            else:
+                succeedPrint("(1/2)succeed to build:{}".format(s.name()))
+
+            if s.deploy() is False:
+                failPrint("(*2/2)fail to deploy:{}".format(s.name()))
+                return
+            else:
+                succeedPrint("(2/2)succeed to deploy:{}".format(s.name()))
+
+    elif options.action == ACTION.DEPLOY:
+        for s in services:
+            if options.sname != ALL_SERVICES and options.sname != s.name():
+                continue
+            if s.build() is False:
                 failPrint("(*1/2)fail to build:{}".format(s.name()))
                 return
             else:
