@@ -1,5 +1,6 @@
 import log from 'src/infra/log'
 import 'webrtc-adapter'
+import codec, { Codec } from './codec'
 
 export interface Sender {
 	send(msg: string): boolean
@@ -7,7 +8,7 @@ export interface Sender {
 
 export interface DataChanCallbacks {
 	onopen: EventHandler | null
-	onmessage: (event: MessageEvent) => void | null
+	onmessage: (msg: string) => void | null
 	onerror: (event: ErrorEvent) => void | null
 	onclose: EventHandler | null
 }
@@ -41,6 +42,7 @@ class PeerConn implements IPeerConn {
 	private dataCh: RTCDataChannel | null
 	private audioElem: HTMLAudioElement
 	private onRemoteAudioAdd: () => void | null
+	private codec: Codec
 	constructor(c: PeerConnConfig) {
 		this.config = c
 		log.info(c.iceServer)
@@ -58,6 +60,8 @@ class PeerConn implements IPeerConn {
 		document.body.appendChild(this.audioElem)
 
 		this.pc.ontrack = ev => this.onRemoteStream(ev)
+
+		this.codec = codec
 	}
 
 	public setSender(sender: Sender): void {
@@ -80,7 +84,8 @@ class PeerConn implements IPeerConn {
 			return false
 		}
 
-		this.dataCh.send(msg)
+		log.info("will send message:", msg)
+		this.dataCh.send(this.codec.encode(msg))
 		return true
 	}
 
@@ -142,8 +147,16 @@ class PeerConn implements IPeerConn {
 
 		this.dataCh.onopen = cbs.onopen || emptyFunc
 		this.dataCh.onclose = cbs.onclose || emptyFunc
-		this.dataCh.onmessage = cbs.onmessage || emptyFunc
 		this.dataCh.onerror = cbs.onerror || emptyFunc
+
+		let onMsg: (msgEv?: MessageEvent) => void = emptyFunc
+		if (cbs.onmessage) {
+			onMsg = (ev: MessageEvent) => {
+				const data = this.codec.decode(ev.data)
+				cbs.onmessage(data)
+			}
+		}
+		this.dataCh.onmessage = onMsg
 	}
 
 	private notifyPeer(o: object | null) {
