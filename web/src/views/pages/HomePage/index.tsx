@@ -111,9 +111,9 @@ class App extends React.Component<any, State>{
 		log.info('Channel closed!!!')
 	}
 
-	private onDataChanMessage(ev: MessageEvent) {
-		log.info('data channel message: ', ev.data)
-		this.setState({ codeText: ev.data })
+	private onDataChanMessage(msg: string) {
+		log.info('data channel message: ', msg)
+		this.setState({ codeText: msg })
 	}
 
 	private onDataChanError(ev: ErrorEvent) {
