@@ -6,5 +6,5 @@ cd $ROOTDIR/web
 yarn install --frozen-lockfile
 cd $ROOTDIR/devops
 python dev.py -t run -e prod -s gw -p ~/work
-python dev.py -t deploy -e prod -s web -p ~/work
+python dev.py -t deploy -e prod -s webclient -p ~/work
 cd $CURDIR
