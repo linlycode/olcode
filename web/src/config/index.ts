@@ -3,7 +3,7 @@ const devConfig = {
 }
 
 const prodConfig = {
-	gatewayPort: 80
+	gatewayPort: 443
 }
 
 export default process.env.NODE_ENV === 'production' ? prodConfig : devConfig
