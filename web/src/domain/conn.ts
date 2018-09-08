@@ -12,6 +12,7 @@ const iConfig: IceServerConfig = {
 export interface ConnConfig {
 	port: number
 	token: string | null
+	ssl: boolean
 	hostname: string
 	// no more details of webrtc exposed to the external
 	dataChCallbacks: DataChanCallbacks
@@ -48,7 +49,7 @@ export default class Conn implements Sender {
 	}
 
 	public connect() {
-		this.ws = new WebSocket(`ws://${this.c.hostname}:${this.c.port}/ws`)
+		this.ws = new WebSocket(`${this.c.ssl ? "wss" : "ws"}://${this.c.hostname}:${this.c.port}/ws`)
 		this.ws.onopen = this.onOpen.bind(this)
 		this.ws.onclose = this.onClose.bind(this)
 		this.ws.onmessage = this.onMessage.bind(this)

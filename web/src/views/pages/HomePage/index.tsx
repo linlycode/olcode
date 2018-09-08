@@ -1,4 +1,5 @@
 import * as React from 'react'
+import config from 'src/config'
 import Conn, { ConnConfig } from 'src/domain/conn'
 import log from 'src/infra/log'
 import { DataChanCallbacks } from 'src/infra/peerconn'
@@ -49,7 +50,8 @@ class App extends React.Component<any, State>{
 			dataChCallbacks: cbs,
 			hostname: window.location.hostname,
 			onRecvToken: (token) => this.onRecvToken(token),
-			port: 8081,
+			port: config.gatewayPort,
+			ssl: window.location.protocol.startsWith("https"),
 			// TODO: this should be passed by props
 			token: new URLSearchParams(window.location.search).get('token'),
 		}
