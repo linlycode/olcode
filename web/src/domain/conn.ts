@@ -1,5 +1,4 @@
 import log from 'src/infra/log'
-// TODO: add global symbol for root path
 import MakePeerConnection, { DataChanCallbacks, IceServerConfig, IPeerConn, PeerConnConfig, Sender } from "src/infra/peerconn"
 
 // TODO: save this to particular config file

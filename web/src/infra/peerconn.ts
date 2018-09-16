@@ -1,5 +1,5 @@
 import log from 'src/infra/log'
-import 'webrtc-adapter'
+import 'webrtc-adapter/out/adapter.js'
 import codec, { Codec } from './codec'
 
 export interface Sender {
