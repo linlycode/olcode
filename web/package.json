@@ -6,6 +6,7 @@
 	"dependencies": {
 		"@material-ui/core": "^1.4.2",
 		"autoprefixer": "7.1.6",
+		"clipboard-copy": "^2.0.1",
 		"codemirror": "^5.40.0",
 		"dotenv": "4.0.0",
 		"dotenv-expand": "4.2.0",
