@@ -6,67 +6,21 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
-const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const getClientEnvironment = require('./env');
 const paths = require('./paths');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
-// Webpack uses `publicPath` to determine where the app is being served from.
-// In development, we always serve from the root. This makes config easier.
-const publicPath = '/';
-// `publicUrl` is just like `publicPath`, but we will provide it to our app
-// as %PUBLIC_URL% in `index.html` and `process.env.PUBLIC_URL` in JavaScript.
-// Omit trailing slash as %PUBLIC_PATH%/xyz looks better than %PUBLIC_PATH%xyz.
-const publicUrl = '';
 // Get environment variables to inject into our app.
 const env = getClientEnvironment(publicUrl);
 
-// This is the development configuration.
-// It is focused on developer experience and fast rebuilds.
-// The production configuration is different and lives in a separate file.
 module.exports = {
-  // You may want 'eval' instead if you prefer to see the compiled output in DevTools.
-  // See the discussion in https://github.com/facebookincubator/create-react-app/issues/343.
-  devtool: 'cheap-module-source-map',
-  // These are the "entry points" to our application.
-  // This means they will be the "root" imports that are included in JS bundle.
-  // The first two entry points enable "hot" CSS and auto-refreshes for JS.
-  entry: [
-    // We ship a few polyfills by default:
-    require.resolve('./polyfills'),
-    // Include an alternative client for WebpackDevServer. A client's job is to
-    // connect to WebpackDevServer by a socket and get notified about changes.
-    // When you save a file, the client will either apply hot updates (in case
-    // of CSS changes), or refresh the page (in case of JS changes). When you
-    // make a syntax error, this client will display a syntax error overlay.
-    // Note: instead of the default WebpackDevServer client, we use a custom one
-    // to bring better experience for Create React App users. You can replace
-    // the line below with these two lines if you prefer the stock client:
-    // require.resolve('webpack-dev-server/client') + '?/',
-    // require.resolve('webpack/hot/dev-server'),
-    require.resolve('react-dev-utils/webpackHotDevClient'),
-    // Finally, this is your app's code:
-    paths.appIndexJs,
-    // We include the app code last so that if there is a runtime error during
-    // initialization, it doesn't blow up the WebpackDevServer client, and
-    // changing JS code would still trigger a refresh.
-  ],
+  // TODO: determined by NODE_EVN
+  devtool: shouldUseSourceMap ? 'source-map' : false,
   output: {
-    // Add /* filename */ comments to generated require()s in the output.
-    pathinfo: true,
-    // This does not produce a real file. It's just the virtual path that is
-    // served by WebpackDevServer in development. This is the JS bundle
-    // containing code from all our entry points, and the Webpack runtime.
-    filename: 'static/js/bundle.js',
-    // There are also additional JS chunk files if you use code splitting.
-    chunkFilename: 'static/js/[name].chunk.js',
-    // This is the URL that app is served from. We use "/" in development.
     publicPath: publicPath,
-    // Point sourcemap entries to original disk location (format as URL on Windows)
-    devtoolModuleFilenameTemplate: info =>
-      path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
   },
   resolve: {
     // This allows you to set a fallback for where Webpack should look for modules.
@@ -153,122 +107,63 @@ module.exports = {
             },
           },
 
-          // Compile .tsx?
-          {
-            test: /\.(ts|tsx)$/,
-            include: paths.appSrc,
-            use: [
-              {
-                loader: require.resolve('ts-loader'),
-                options: {
-                  // disable type checker - we will use it in fork plugin
-                  transpileOnly: true,
-                },
-              },
-            ],
-          },
+         
+          // The notation here is somewhat confusing.
           // "postcss" loader applies autoprefixer to our CSS.
           // "css" loader resolves paths in CSS and adds assets as dependencies.
-          // "style" loader turns CSS into JS modules that inject <style> tags.
-          // In production, we use a plugin to extract that CSS to a file, but
-          // in development "style" loader enables hot editing of CSS.
+          // "style" loader normally turns CSS into JS modules injecting <style>,
+          // but unlike in development configuration, we do something different.
+          // `ExtractTextPlugin` first applies the "postcss" and "css" loaders
+          // (second argument), then grabs the result CSS and puts it into a
+          // separate file in our build process. This way we actually ship
+          // a single CSS file in production instead of JS code injecting <style>
+          // tags. If you use code splitting, however, any async bundles will still
+          // use the "style" loader inside the async code so CSS from them won't be
+          // in the main CSS file.
           {
-            test: /\.(?:le|c)ss$/,
-            use: [
-              require.resolve('style-loader'),
-              {
-                loader: require.resolve('css-loader'),
-                options: {
-                  modules: true,
-                  namedExport: true,
-                  camelCase: true,
-                  localIdentName: '[local]_[hash:base64:5]'
-                }
-              },
-              {
-                loader: require.resolve('postcss-loader'),
-                options: {
-                  // Necessary for external CSS imports to work
-                  // https://github.com/facebookincubator/create-react-app/issues/2677
-                  ident: 'postcss',
-                  plugins: () => [
-                    require('postcss-flexbugs-fixes'),
-                    autoprefixer({
-                      browsers: [
-                        '>1%',
-                        'last 4 versions',
-                        'Firefox ESR',
-                        'not ie < 9', // React doesn't support IE8 anyway
-                      ],
-                      flexbox: 'no-2009',
-                    }),
-                  ],
-                },
-              },
-            ],
+            test: /\.css$/,
+            loader: [MiniCssExtractPlugin.loader, 'css-loader']
+            // Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
           },
-          // "file" loader makes sure those assets get served by WebpackDevServer.
-          // When you `import` an asset, you get its (virtual) filename.
-          // In production, they would get copied to the `build` folder.
+          // "file" loader makes sure assets end up in the `build` folder.
+          // When you `import` an asset, you get its filename.
           // This loader doesn't use a "test" so it will catch all modules
           // that fall through the other loaders.
           {
+            loader: require.resolve('file-loader'),
             // Exclude `js` files to keep "css" loader working as it injects
-            // its runtime that would otherwise processed through "file" loader.
+            // it's runtime that would otherwise processed through "file" loader.
             // Also exclude `html` and `json` extensions so they get processed
             // by webpacks internal loaders.
             exclude: [/\.(js|jsx|mjs)$/, /\.html$/, /\.json$/],
-            loader: require.resolve('file-loader'),
             options: {
               name: 'static/media/[name].[hash:8].[ext]',
             },
           },
+          // ** STOP ** Are you adding a new loader?
+          // Make sure to add the new loader(s) before the "file" loader.
         ],
       },
-      // ** STOP ** Are you adding a new loader?
-      // Make sure to add the new loader(s) before the "file" loader.
     ],
   },
   plugins: [
     // Makes some environment variables available in index.html.
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
-    // In development, this will be an empty string.
+    // In production, it will be an empty string unless you specify "homepage"
+    // in `package.json`, in which case it will be the pathname of that URL.
     new InterpolateHtmlPlugin(env.raw),
-    // Generates an `index.html` file with the <script> injected.
-    new HtmlWebpackPlugin({
-      inject: true,
-      template: paths.appHtml,
-    }),
-    // Add module names to factory functions so they appear in browser profiler.
-    new webpack.NamedModulesPlugin(),
     // Makes some environment variables available to the JS code, for example:
-    // if (process.env.NODE_ENV === 'development') { ... }. See `./env.js`.
+    // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
+    // It is absolutely essential that NODE_ENV was set to production here.
+    // Otherwise React will be compiled in the very slow development mode.
     new webpack.DefinePlugin(env.stringified),
-    // This is necessary to emit hot updates (currently CSS only):
-    new webpack.HotModuleReplacementPlugin(),
-    // Watcher doesn't work well if you mistype casing in a path so we use
-    // a plugin that prints an error when you attempt to do this.
-    // See https://github.com/facebookincubator/create-react-app/issues/240
-    new CaseSensitivePathsPlugin(),
-    // If you require a missing module and then `npm install` it, you still have
-    // to restart the development server for Webpack to discover it. This plugin
-    // makes the discovery automatic so you don't have to restart.
-    // See https://github.com/facebookincubator/create-react-app/issues/186
-    new WatchMissingNodeModulesPlugin(paths.appNodeModules),
     // Moment.js is an extremely popular library that bundles large locale files
     // by default due to how Webpack interprets its code. This is a practical
     // solution that requires the user to opt into importing specific locales.
     // https://github.com/jmblog/how-to-optimize-momentjs-with-webpack
     // You can remove this if you don't use Moment.js:
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-    // Perform type checking and linting in a separate process to speed up compilation
-    new ForkTsCheckerWebpackPlugin({
-      async: false,
-      watch: paths.appSrc,
-      tsconfig: paths.appTsConfig,
-      tslint: paths.appTsLint,
-    }),
   ],
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
@@ -278,11 +173,5 @@ module.exports = {
     net: 'empty',
     tls: 'empty',
     child_process: 'empty',
-  },
-  // Turn off performance hints during development because we don't do any
-  // splitting or minification in interest of speed. These warnings become
-  // cumbersome.
-  performance: {
-    hints: false,
   },
 };
