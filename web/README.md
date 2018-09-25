@@ -1880,7 +1880,7 @@ runtime caching strategy for those requests, you can [`eject`](#npm-run-eject)
 and then configure the
 [`runtimeCaching`](https:// github.com/GoogleChrome/sw-precache#runtimecaching-arrayobject)
 option in the `SWPrecacheWebpackPlugin` section of
-[`webpack.config.prod.js`](../config/webpack.config.prod.js).
+[`webpack.conf.prod.js`](../config/webpack.conf.prod.js).
 
 ### Progressive Web App Metadata
 
@@ -2015,7 +2015,7 @@ service worker navigation routing can be configured or disabled by
 [`eject`ing](#npm-run-eject) and then modifying the
 [`navigateFallback`](https:// github.com/GoogleChrome/sw-precache#navigatefallback-string)
 and [`navigateFallbackWhitelist`](https:// github.com/GoogleChrome/sw-precache#navigatefallbackwhitelist-arrayregexp)
-options of the `SWPreachePlugin` [configuration](../config/webpack.config.prod.js).
+options of the `SWPreachePlugin` [configuration](../config/webpack.conf.prod.js).
 
 ### Building for Relative Paths
 
