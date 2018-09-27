@@ -14,7 +14,6 @@ const Token = styled.div`
 	box-shadow: 0 0 10px 1px #eee inset;
 `
 
-
 const loadingText = "..."
 function getShareLink(token: string | null): string {
 	if (token === null) {
