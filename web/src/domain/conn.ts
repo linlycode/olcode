@@ -1,5 +1,5 @@
 import log from 'src/infra/log'
-import MakePeerConnection, { DataChanCallbacks, IceServerConfig, IPeerConn, PeerConnConfig, Sender } from "src/infra/peerconn"
+import MakePeerConnection, { AVCallbacks, DataChanCallbacks, IceServerConfig, IPeerConn, PeerConnConfig, Sender } from "src/infra/peerconn"
 
 // TODO: save this to particular config file
 const iConfig: IceServerConfig = {
@@ -15,13 +15,15 @@ export interface ConnConfig {
 	hostname: string
 	// no more details of webrtc exposed to the external
 	dataChCallbacks: DataChanCallbacks
+	avCallbacks: AVCallbacks
 	onRecvToken: (token: string) => void
 }
 
 function createPeerConnectionConfig(c: ConnConfig): PeerConnConfig {
 	const pConfig: PeerConnConfig = {
+		avCallbacks: c.avCallbacks,
 		dataChCallbacks: c.dataChCallbacks,
-		iceServer: iConfig
+		iceServer: iConfig,
 	}
 	return pConfig
 }
@@ -56,8 +58,8 @@ export default class Conn implements Sender {
 		this.pc.setSender(this)
 	}
 
-	public audioCall(onSucess: () => void) {
-		this.pc.audioCall(onSucess)
+	public audioCall() {
+		this.pc.audioCall()
 	}
 
 	private onOpen(ev: Event) {

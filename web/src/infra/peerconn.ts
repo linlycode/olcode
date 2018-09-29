@@ -13,12 +13,16 @@ export interface DataChanCallbacks {
 	onclose: EventHandler | null
 }
 
+export interface AVCallbacks {
+	onRemoteAudioAdd: () => void | null
+}
+
 export interface IPeerConn {
 	setSender(sender: Sender): void
 	connect(): void
 	sendData(msg: string): boolean
 	closeDataChan(): void
-	audioCall(onSuccess: () => void): void
+	audioCall(): void
 	handlePeerIceCandidate(candidate: RTCIceCandidateInit): boolean
 	handlePeerSdp(message: RTCSessionDescriptionInit): boolean
 }
@@ -32,6 +36,7 @@ export interface IceServerConfig {
 export interface PeerConnConfig {
 	iceServer: IceServerConfig
 	dataChCallbacks: DataChanCallbacks
+	avCallbacks: AVCallbacks
 }
 
 class PeerConn implements IPeerConn {
@@ -46,6 +51,7 @@ class PeerConn implements IPeerConn {
 	constructor(c: PeerConnConfig) {
 		this.config = c
 		log.info(c.iceServer)
+		this.onRemoteAudioAdd = c.avCallbacks.onRemoteAudioAdd
 		this.pc = new RTCPeerConnection({
 			iceServers: [c.iceServer],
 		})
@@ -96,8 +102,7 @@ class PeerConn implements IPeerConn {
 		}
 	}
 
-	public audioCall(onSuccess: () => void): void {
-		this.onRemoteAudioAdd = onSuccess
+	public audioCall(): void {
 		const constraint = { audio: true }
 		navigator.mediaDevices
 			.getUserMedia(constraint)
