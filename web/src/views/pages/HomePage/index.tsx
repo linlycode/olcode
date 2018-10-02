@@ -2,7 +2,7 @@ import * as React from 'react'
 import config from 'src/config'
 import Conn, { ConnConfig } from 'src/domain/conn'
 import log from 'src/infra/log'
-import { DataChanCallbacks } from 'src/infra/peerconn'
+import { AVCallbacks, DataChanCallbacks } from 'src/infra/peerconn'
 import * as Layouts from 'src/styles/layouts'
 import SideBar from 'src/views/widgets/SideBar'
 import TopBar from 'src/views/widgets/TopBar'
@@ -33,21 +33,27 @@ const Textarea = styled.textarea`
 interface State {
 	codeTextareaDisabled: boolean
 	codeText: string
-	token: string | null
+	token: string | null,
+	audioConnected: boolean,
+	codeConnected: boolean,
 }
 
 class App extends React.Component<any, State>{
 	private conn: Conn
 	constructor(props: any) {
 		super(props)
-		const cbs: DataChanCallbacks = {
+		const dataChCallbacks: DataChanCallbacks = {
 			onclose: this.onDataChanClose.bind(this),
 			onerror: this.onDataChanError.bind(this),
 			onmessage: this.onDataChanMessage.bind(this),
 			onopen: this.onDataChanOpen.bind(this),
 		}
+		const avCallbacks: AVCallbacks = {
+			onRemoteAudioAdd: this.onRemoteAudioAdd.bind(this)
+		}
 		const c: ConnConfig = {
-			dataChCallbacks: cbs,
+			avCallbacks,
+			dataChCallbacks,
 			hostname: window.location.hostname,
 			onRecvToken: (token) => this.onRecvToken(token),
 			port: config.gatewayPort,
@@ -60,9 +66,11 @@ class App extends React.Component<any, State>{
 
 		this.conn = new Conn(c)
 		this.state = {
+			audioConnected: false,
+			codeConnected: false,
 			codeText: "",
 			codeTextareaDisabled: true,
-			token: c.token || null
+			token: c.token || null,
 		}
 		this.updateCodeText = this.updateCodeText.bind(this)
 		this.onCallBtnClick = this.onCallBtnClick.bind(this)
@@ -80,6 +88,8 @@ class App extends React.Component<any, State>{
 					onCallBtnClick={this.onCallBtnClick}
 				/>
 				<Content>
+					<p>audio connection status: {this.connectionStatusText(this.state.audioConnected)}</p>
+					<p>code connection status: {this.connectionStatusText(this.state.codeConnected)}</p>
 					<Textarea
 						disabled={this.state.codeTextareaDisabled}
 						value={this.state.codeText}
@@ -89,6 +99,12 @@ class App extends React.Component<any, State>{
 			</Wrapper>
 		)
 	}
+
+
+	private connectionStatusText(connected: boolean): string {
+		return connected ? 'connected' : 'disconnected'
+	}
+
 
 	private onRecvToken(token: string) {
 		this.setState({ token })
@@ -101,12 +117,16 @@ class App extends React.Component<any, State>{
 
 	private onDataChanOpen(ev: Event) {
 		log.info('Channel opened!!!')
-		this.setState({ codeTextareaDisabled: false })
+		this.setState({ codeTextareaDisabled: false, codeConnected: true })
+	}
+
+	private onRemoteAudioAdd() {
+		log.info("audio call succeed")
+		this.setState({ audioConnected: true })
 	}
 
 	private onCallBtnClick() {
-		const onSuccess = () => log.info("audio call succeed")
-		this.conn.audioCall(onSuccess)
+		this.conn.audioCall()
 	}
 
 	private onDataChanClose(ev: Event) {
