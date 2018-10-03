@@ -5,6 +5,7 @@
 	"license": "SEE LICENSE IN ../LICENSE",
 	"dependencies": {
 		"@material-ui/core": "^1.4.2",
+		"@types/codemirror": "^0.0.61",
 		"antd": "^3.9.2",
 		"autoprefixer": "7.1.6",
 		"clipboard-copy": "^2.0.1",

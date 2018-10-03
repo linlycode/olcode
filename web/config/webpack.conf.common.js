@@ -19,7 +19,7 @@ const configFile = isDev ? paths.appTsConfig : paths.appTsProdConfig
 
 module.exports = {
   resolve: {
-   modules: ['node_modules', paths.appNodeModules].concat(
+    modules: ['node_modules', paths.appNodeModules].concat(
       process.env.NODE_PATH.split(path.delimiter).filter(Boolean)
     ),
     extensions: [
@@ -50,7 +50,7 @@ module.exports = {
     strictExportPresence: true,
     rules: [
       {
-        test: /webrtc-adapter\/out\/adapter.js$/,
+        test: [/webrtc-adapter\/out\/adapter.js$/, /codemirror\/mode\/javascript\/javascript.js$/],
         use: ['script-loader'],
       },
       // TODO: Disable require.ensure as it's not a standard language feature.
@@ -80,7 +80,7 @@ module.exports = {
               compact: true,
             },
           },
-           {
+          {
             test: /\.(ts|tsx)$/,
             include: paths.appSrc,
             use: [
@@ -102,7 +102,7 @@ module.exports = {
           },
           {
             test: /\.css$/,
-            use: ['style-loader','css-loader'],
+            use: ['style-loader', 'css-loader'],
           },
           {
             exclude: [/\.(js|jsx|mjs)$/, /\.html$/, /\.json$/],
@@ -113,14 +113,14 @@ module.exports = {
           },
         ]
       }
-    ],  
+    ],
   },
   plugins: [
     new InterpolateHtmlPlugin(env.raw),
     new HtmlWebpackPlugin({
       inject: true,
       template: paths.appHtml,
-      minify: isDev ? {} :{
+      minify: isDev ? {} : {
         removeComments: true,
         collapseWhitespace: true,
         removeRedundantAttributes: true,
