@@ -4,6 +4,7 @@ import Conn, { ConnConfig } from 'src/domain/conn'
 import log from 'src/infra/log'
 import { AVCallbacks, DataChanCallbacks } from 'src/infra/peerconn'
 import * as Layouts from 'src/styles/layouts'
+import CodeEditor from 'src/views/widgets/Editor'
 import SideBar from 'src/views/widgets/SideBar'
 import TopBar from 'src/views/widgets/TopBar'
 import styled from 'styled-components'
@@ -21,14 +22,6 @@ const Content = styled.div`
 	overflow: auto;
 `
 
-const Textarea = styled.textarea`
-	margin: 100px;
-	width: 80%;
-	height: 300px;
-	border-color: #e6e6e6;
-	padding: 15px;
-	font-size: 14px;
-`
 
 interface State {
 	codeTextareaDisabled: boolean
@@ -68,7 +61,7 @@ class App extends React.Component<any, State>{
 		this.state = {
 			audioConnected: false,
 			codeConnected: false,
-			codeText: "",
+			codeText: "// Press Start(or be started), enter some text, then press Send.",
 			codeTextareaDisabled: true,
 			token: c.token || null,
 		}
@@ -90,11 +83,11 @@ class App extends React.Component<any, State>{
 				<Content>
 					<p>audio connection status: {this.connectionStatusText(this.state.audioConnected)}</p>
 					<p>code connection status: {this.connectionStatusText(this.state.codeConnected)}</p>
-					<Textarea
+					<CodeEditor
 						disabled={this.state.codeTextareaDisabled}
-						value={this.state.codeText}
-						onChange={this.updateCodeText}
-						placeholder="Press Start(or be started), enter some text, then press Send." />
+						code={this.state.codeText}
+						onCodeChange={this.updateCodeText}
+					/>
 				</Content>
 			</Wrapper>
 		)
@@ -110,9 +103,9 @@ class App extends React.Component<any, State>{
 		this.setState({ token })
 	}
 
-	private updateCodeText(ev: React.ChangeEvent<HTMLTextAreaElement>) {
-		this.setState({ codeText: ev.target.value })
-		this.conn.sync(ev.target.value)
+	private updateCodeText(code: string) {
+		this.setState({ codeText: code })
+		this.conn.sync(code)
 	}
 
 	private onDataChanOpen(ev: Event) {
