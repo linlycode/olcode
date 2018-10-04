@@ -5,6 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const tsImportPluginFactory = require('ts-import-plugin')
 const paths = require('./paths');
 const getClientEnvironment = require('./env');
 
@@ -76,7 +77,6 @@ module.exports = {
             include: paths.appSrc,
             loader: require.resolve('babel-loader'),
             options: {
-
               compact: true,
             },
           },
@@ -88,6 +88,13 @@ module.exports = {
                 loader: require.resolve('ts-loader'),
                 options: {
                   transpileOnly: true,
+                  getCustomTransformers: () => ({
+                    before: [ tsImportPluginFactory({
+                      libraryDirectory: 'es',
+                      libraryName: 'antd',
+                      style: 'css',
+                    }) ]
+                  }),
                   configFile,
                 },
               },
