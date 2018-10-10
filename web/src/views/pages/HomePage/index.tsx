@@ -6,7 +6,7 @@ import Conn, { ConnConfig } from 'src/domain/conn'
 import log from 'src/infra/log'
 import { AVCallbacks, DataChanCallbacks } from 'src/infra/peerconn'
 import CodeEditor from 'src/views/widgets/Editor'
-import SidePannel from './SidePannel'
+import SidePannel from './Side'
 
 interface State {
 	codeTextareaDisabled: boolean
