@@ -1,27 +1,12 @@
+import { Layout } from 'antd'
 import * as React from 'react'
+
 import config from 'src/config'
 import Conn, { ConnConfig } from 'src/domain/conn'
 import log from 'src/infra/log'
 import { AVCallbacks, DataChanCallbacks } from 'src/infra/peerconn'
-import * as Layouts from 'src/styles/layouts'
 import CodeEditor from 'src/views/widgets/Editor'
-import SideBar from 'src/views/widgets/SideBar'
-import TopBar from 'src/views/widgets/TopBar'
-import styled from 'styled-components'
-
-const Wrapper = styled.div`
-	text-align: center;
-`
-
-const Content = styled.div`
-	position: fixed;
-	top: ${Layouts.topbarHeight}px;
-	right: 0;
-	bottom: 0;
-	left: ${Layouts.sideBarWidth}px;
-	overflow: auto;
-`
-
+import SidePannel from './sidepannel'
 
 interface State {
 	codeTextareaDisabled: boolean
@@ -74,30 +59,31 @@ class App extends React.Component<any, State>{
 	}
 
 	public render() {
+		const { audioConnected, codeConnected } = this.state
 		return (
-			<Wrapper>
-				<TopBar title="Online Code" />
-				<SideBar token={this.state.token}
-					onCallBtnClick={this.onCallBtnClick}
-				/>
-				<Content>
-					<p>audio connection status: {this.connectionStatusText(this.state.audioConnected)}</p>
-					<p>code connection status: {this.connectionStatusText(this.state.codeConnected)}</p>
-					<CodeEditor
-						disabled={this.state.codeTextareaDisabled}
-						code={this.state.codeText}
-						onCodeChange={this.updateCodeText}
-					/>
-				</Content>
-			</Wrapper>
+			<Layout>
+				<Layout.Header>
+					Online Code
+				</Layout.Header>
+				<Layout>
+					<Layout.Sider theme='light' width="16.7%">
+						<SidePannel token={this.state.token}
+							onCallBtnClick={this.onCallBtnClick}
+							audioConnected={audioConnected}
+							codeConnected={codeConnected}
+						/>
+					</Layout.Sider>
+					<Layout.Content>
+						<CodeEditor
+							disabled={this.state.codeTextareaDisabled}
+							code={this.state.codeText}
+							onCodeChange={this.updateCodeText}
+						/>
+					</Layout.Content>
+				</Layout>
+			</Layout>
 		)
 	}
-
-
-	private connectionStatusText(connected: boolean): string {
-		return connected ? 'connected' : 'disconnected'
-	}
-
 
 	private onRecvToken(token: string) {
 		this.setState({ token })

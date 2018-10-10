@@ -45,7 +45,7 @@ export default class Editor extends React.Component<any, Props> {
 	}
 
 	public componentDidMount() {
-		const container = document.getElementById(this.id()) as HTMLTextAreaElement
+		const container = document.getElementById(this.id()) as HTMLElement
 		this.cm = CodeMirror(container, {
 			lineNumbers: true,
 			value: this.code,
