@@ -1,7 +1,33 @@
-import { Button, Row, Tag } from 'antd'
+import { Button, Icon, Layout, Row, Tag, Tooltip } from 'antd'
 import * as React from 'react'
+import styled from 'styled-components'
 
 import { copyToClipboard } from 'src/infra/copy'
+
+const Adress = styled.div`
+	border: 1px solid #eee;
+	border-radius: 2px;
+	padding: 0 15px;
+	font-size: 14px;
+	line-height: 2;
+	display: inline-block;
+	width: 200px;
+	overflow: auto;
+	vertical-align: middle;
+`
+
+const Sider = styled(Layout.Sider)`
+	padding: 10px;
+`
+
+const Status =styled.ul`
+	list-style: none;
+	padding: 0;
+
+	li {
+		margin-top: 5px;
+	}
+`
 
 const loadingText = "..."
 function getShareLink(token: string | null): string {
@@ -18,6 +44,12 @@ interface Props {
 	codeConnected: boolean
 }
 
+interface AddonProps {
+	onClick: () => void,
+	text: string,
+	icon: string
+}
+
 export default class SidePannel extends React.Component<any, Props> {
 	constructor(props: Props) {
 		super(props)
@@ -32,34 +64,25 @@ export default class SidePannel extends React.Component<any, Props> {
 		} = this.props
 
 		return (
-			<React.Fragment>
+			<Sider theme="light" width="300">
 				<Row>
-					<Tag>
+					<Adress>
 						{getShareLink(this.props.token)}
-					</Tag>
+					</Adress>
+					<Addon text="copy link" icon="copy" onClick={this.onClickCopyButton}/>
+					<Addon text="audio call" icon="video-camera" onClick={onCallBtnClick}/>
 				</Row>
 				<Row>
-					<Button
-						size="small"
-						type="primary"
-						onClick={this.onClickCopyButton}>
-						Copy Link
-					</Button>
-					<Button
-						size="small"
-						type="primary"
-						onClick={onCallBtnClick}>
-						Audio call
-					</Button>
+					<Status>
+						<li>
+							audio: {this.connectionStatusText(audioConnected)}
+						</li>
+						<li>
+							code: {this.connectionStatusText(codeConnected)}
+						</li>
+					</Status>
 				</Row>
-				<Row>
-					<p>
-						audio: {this.connectionStatusText(audioConnected)}
-						<br />
-						code: {this.connectionStatusText(codeConnected)}
-					</p>
-				</Row>
-			</React.Fragment>
+			</Sider>
 		)
 	}
 
@@ -67,7 +90,17 @@ export default class SidePannel extends React.Component<any, Props> {
 		copyToClipboard(getShareLink(this.props.token))
 	}
 
-	private connectionStatusText(connected: boolean): string {
-		return connected ? 'connected' : 'disconnected'
+	private connectionStatusText(connected: boolean) {
+		return connected
+			? <Tag color="green">connected</Tag>
+			: <Tag color="red">disconnected</Tag>
 	}
+}
+
+function Addon(props:AddonProps) {
+	return <Tooltip placement="top" title={props.text}>
+	<Button style={{ marginLeft: "5px" }} size="small" onClick={props.onClick}>
+		<Icon type={props.icon}	theme="outlined"/>
+	</Button>
+</Tooltip>
 }
