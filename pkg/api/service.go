@@ -23,6 +23,8 @@ func NewService(port int) Service {
 
 	r.HandleFunc("/ws", h.serveWS)
 
+	r.Use(jsonMiddleWare)
+
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
 		Handler: r,
