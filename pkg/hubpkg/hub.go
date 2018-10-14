@@ -9,16 +9,18 @@ import (
 
 // Hub is a collection of peers(now only support two peers)
 type Hub struct {
-	ID int64
+	ID   int64
+	code string
+	cMu  *sync.RWMutex
 
 	pm  map[int64]*Peer
-	mtx *sync.RWMutex
+	pMu *sync.RWMutex
 }
 
 // Broadcast send the message to all the members in the hub
 func (h *Hub) Broadcast(senderID int64, msg []byte) error {
-	h.mtx.RLock()
-	defer h.mtx.RUnlock()
+	h.pMu.RLock()
+	defer h.pMu.RUnlock()
 
 	var rErr error
 	for id, p := range h.pm {
@@ -36,8 +38,8 @@ func (h *Hub) Broadcast(senderID int64, msg []byte) error {
 
 // AddPeer add Peer into the hub
 func (h *Hub) AddPeer(p *Peer) error {
-	h.mtx.Lock()
-	defer h.mtx.Unlock()
+	h.pMu.Lock()
+	defer h.pMu.Unlock()
 
 	if len(h.pm) >= 2 {
 		return fmt.Errorf("hub is full")
@@ -49,8 +51,27 @@ func (h *Hub) AddPeer(p *Peer) error {
 
 func newHub(id int64) *Hub {
 	return &Hub{
-		ID:  id,
-		pm:  make(map[int64]*Peer),
-		mtx: &sync.RWMutex{},
+		ID:   id,
+		code: "",
+		cMu:  &sync.RWMutex{},
+		pm:   make(map[int64]*Peer),
+		pMu:  &sync.RWMutex{},
 	}
+}
+
+// SetCode updates the code field thread-safely
+func (h *Hub) SetCode(code string) error {
+	h.cMu.Lock()
+	defer h.cMu.Unlock()
+
+	h.code = code
+	return nil
+}
+
+// GetCode get the code field thread-safely
+func (h *Hub) GetCode() string {
+	h.cMu.RLock()
+	defer h.cMu.RUnlock()
+
+	return h.code
 }
