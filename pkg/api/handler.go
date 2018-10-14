@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-
 	"github.com/gorilla/websocket"
 	"github.com/linlycode/olcode/pkg/hubpkg"
 	"github.com/linlycode/olcode/pkg/ws"

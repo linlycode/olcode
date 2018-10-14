@@ -21,7 +21,10 @@ func NewService(port int) Service {
 	h := newHandler()
 	r := mux.NewRouter()
 
+	r.HandleFunc("/api/sync_code", h.syncCode)
 	r.HandleFunc("/ws", h.serveWS)
+
+	r.Use(jsonMiddleWare)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
