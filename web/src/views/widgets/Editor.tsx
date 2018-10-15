@@ -1,7 +1,16 @@
 import CodeMirror from 'codemirror'
 import 'codemirror/lib/codemirror.css'
+import styled from 'styled-components'
 
 import * as React from 'react'
+
+const Wrapper = styled.div`
+	height: 100%;
+
+	.CodeMirror {
+		height: 100%;
+	}
+`
 
 interface Props {
 	disabled?: boolean,
@@ -56,7 +65,7 @@ export default class Editor extends React.Component<any, Props> {
 	}
 
 	public render() {
-		return <div id={this.id()} />
+		return <Wrapper id={this.id()} />
 	}
 
 	private handleCodeChange() {

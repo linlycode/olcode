@@ -1,5 +1,6 @@
 import { Layout } from 'antd'
 import * as React from 'react'
+import styled from 'styled-components'
 
 import config from 'src/config'
 import Conn, { ConnConfig } from 'src/domain/conn'
@@ -7,6 +8,15 @@ import log from 'src/infra/log'
 import { AVCallbacks, DataChanCallbacks } from 'src/infra/peerconn'
 import CodeEditor from 'src/views/widgets/Editor'
 import SidePannel from './SidePannel'
+
+const Wrapper = styled(Layout)`
+	height: 100vh;
+`
+
+const Header = styled(Layout.Header)`
+	color: white;
+	font-size: 2em;
+`
 
 interface State {
 	codeTextareaDisabled: boolean
@@ -61,18 +71,16 @@ class App extends React.Component<any, State>{
 	public render() {
 		const { audioConnected, codeConnected } = this.state
 		return (
-			<Layout>
-				<Layout.Header>
+			<Wrapper>
+				<Header>
 					Online Code
-				</Layout.Header>
-				<Layout>
-					<Layout.Sider theme='light' width="16.7%">
-						<SidePannel token={this.state.token}
-							onCallBtnClick={this.onCallBtnClick}
-							audioConnected={audioConnected}
-							codeConnected={codeConnected}
-						/>
-					</Layout.Sider>
+				</Header>
+				<Wrapper>
+					<SidePannel token={this.state.token}
+						onCallBtnClick={this.onCallBtnClick}
+						audioConnected={audioConnected}
+						codeConnected={codeConnected}
+					/>
 					<Layout.Content>
 						<CodeEditor
 							disabled={this.state.codeTextareaDisabled}
@@ -80,8 +88,8 @@ class App extends React.Component<any, State>{
 							onCodeChange={this.updateCodeText}
 						/>
 					</Layout.Content>
-				</Layout>
-			</Layout>
+				</Wrapper>
+			</Wrapper>
 		)
 	}
 

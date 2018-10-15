@@ -13,6 +13,7 @@
 	"rules": {
 		"eofline": true,
 		"no-trailing-whitespace": true,
+		"no-unused-expression": [true, "allow-tagged-template"],
 		"linebreak-style": [
 			true,
 			"LF"
