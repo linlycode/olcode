@@ -14,6 +14,7 @@ const Adress = styled.div`
 	width: 200px;
 	overflow: auto;
 	vertical-align: middle;
+	white-space: nowrap;
 `
 
 const Sider = styled(Layout.Sider)`
