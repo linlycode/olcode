@@ -1,11 +1,12 @@
 ## olcode
-An application based on webrtc aims to give an excellent interview for both interviewer and interviewee. 
+An application based on webrtc aims at giving an excellent experience for both interviewer and programmer interviewee.
+See our [demo](https://togetherers.com)
 
 ## Architecture
-1. first step: 
+1. first step:
 ```
 signal server   <-----> peer1
-|                         
+|
 \-------------> peer2
 ```
 peer1 & peer2 connect to signal server then exchange some basic information for p2p connecting.
@@ -25,15 +26,12 @@ If you want to start developing now, just follows the steps to prepare a develop
 
 ### develop dependencies
 1. [golang](https://golang.org/)
-2. [dep](https://github.com/golang/dep)
-3. [node](https://nodejs.org/)
-4. [yarn](https://yarnpkg.com/)
-5. [typescript](https://www.typescriptlang.org/)
+2. [node](https://nodejs.org/)
+3. [yarn](https://yarnpkg.com/)
 
 ### run signal server
 ```
 cd olcode
-dep ensure
 cd devops
 pip install -r requirements.txt
 python dev.py -t run -s gw
