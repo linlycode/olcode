@@ -53,7 +53,7 @@ class PeerConn implements IPeerConn {
 		log.info(c.iceServer)
 		this.onRemoteAudioAdd = c.avCallbacks.onRemoteAudioAdd
 		this.pc = new RTCPeerConnection({
-			iceServers: [c.iceServer],
+			iceServers: [c.iceServer]
 		})
 		this.pc.onicecandidate = ev => this.onIceCandidate(ev)
 		this.pc.ondatachannel = ({ channel }) => this.onDataChCreated(channel)
@@ -78,7 +78,7 @@ class PeerConn implements IPeerConn {
 		// createDataChannel must be called before createOffer
 		// TODO: add data channel should not be the default behavior of connect
 		if (!this.dataCh) {
-			this.onDataChCreated(this.pc.createDataChannel("code"))
+			this.onDataChCreated(this.pc.createDataChannel('code'))
 		}
 		this.pc.createOffer().then((offer: RTCSessionDescriptionInit) => {
 			this.onLocalSessionCreated(offer)
@@ -90,7 +90,7 @@ class PeerConn implements IPeerConn {
 			return false
 		}
 
-		log.info("will send message:", msg)
+		log.info('will send message:', msg)
 		this.dataCh.send(this.codec.encode(msg))
 		return true
 	}
@@ -108,7 +108,7 @@ class PeerConn implements IPeerConn {
 			.getUserMedia(constraint)
 			.then(stream => {
 				this.addAudioTracks(stream)
-				log.info("audio call is made leading to renegotiation")
+				log.info('audio call is made leading to renegotiation')
 				this.connect()
 			})
 			.catch(e => log.error(e))
@@ -121,10 +121,13 @@ class PeerConn implements IPeerConn {
 
 	public handlePeerSdp(message: RTCSessionDescriptionInit): boolean {
 		switch (message.type) {
-			case "offer":
+			case 'offer':
 				log.info('Got offer. Sending answer to peer.')
 				this.pc.setRemoteDescription(message, () => null, log.info)
-				const reply = () => this.pc.createAnswer().then((answer) => this.onLocalSessionCreated(answer))
+				const reply = () =>
+					this.pc
+						.createAnswer()
+						.then(answer => this.onLocalSessionCreated(answer))
 
 				// found audio tracks in offer sdp
 				// an answer with audio information should be generated
@@ -134,7 +137,7 @@ class PeerConn implements IPeerConn {
 					reply()
 				}
 				break
-			case "answer":
+			case 'answer':
 				log.info('Got answer.')
 				this.pc.setRemoteDescription(message, () => null, log.info)
 				break
@@ -145,7 +148,7 @@ class PeerConn implements IPeerConn {
 	}
 
 	private onDataChCreated(ch: RTCDataChannel): void {
-		log.info("data channel created")
+		log.info('data channel created')
 		this.dataCh = ch
 		const emptyFunc = () => null
 		const cbs = this.config.dataChCallbacks
@@ -176,7 +179,8 @@ class PeerConn implements IPeerConn {
 				log.info('sending local desc:', this.pc.localDescription)
 				this.notifyPeer(this.pc.localDescription)
 			},
-			log.info)
+			log.info
+		)
 	}
 
 	// IceCandidate will be generated from the local
@@ -191,7 +195,7 @@ class PeerConn implements IPeerConn {
 			candidate: event.candidate.candidate,
 			sdpMLineIndex: event.candidate.sdpMLineIndex,
 			sdpMid: event.candidate.sdpMid,
-			type: 'candidate',
+			type: 'candidate'
 		})
 	}
 
@@ -224,7 +228,7 @@ class PeerConn implements IPeerConn {
 					onAttached()
 				}
 			})
-			.catch(e => log.error("fail to append audio track"))
+			.catch(e => log.error('fail to append audio track'))
 	}
 }
 

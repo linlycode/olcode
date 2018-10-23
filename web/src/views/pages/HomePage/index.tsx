@@ -21,12 +21,12 @@ const Header = styled(Layout.Header)`
 interface State {
 	codeTextareaDisabled: boolean
 	codeText: string
-	token: string | null,
-	audioConnected: boolean,
-	codeConnected: boolean,
+	token: string | null
+	audioConnected: boolean
+	codeConnected: boolean
 }
 
-class App extends React.Component<any, State>{
+class App extends React.Component<any, State> {
 	private conn: Conn
 	constructor(props: any) {
 		super(props)
@@ -34,7 +34,7 @@ class App extends React.Component<any, State>{
 			onclose: this.onDataChanClose.bind(this),
 			onerror: this.onDataChanError.bind(this),
 			onmessage: this.onDataChanMessage.bind(this),
-			onopen: this.onDataChanOpen.bind(this),
+			onopen: this.onDataChanOpen.bind(this)
 		}
 		const avCallbacks: AVCallbacks = {
 			onRemoteAudioAdd: this.onRemoteAudioAdd.bind(this)
@@ -43,22 +43,23 @@ class App extends React.Component<any, State>{
 			avCallbacks,
 			dataChCallbacks,
 			hostname: window.location.hostname,
-			onRecvToken: (token) => this.onRecvToken(token),
+			onRecvToken: token => this.onRecvToken(token),
 			port: config.gatewayPort,
-			ssl: window.location.protocol.startsWith("https"),
+			ssl: window.location.protocol.startsWith('https'),
 			// TODO: this should be passed by props
-			token: new URLSearchParams(window.location.search).get('token'),
+			token: new URLSearchParams(window.location.search).get('token')
 		}
 
-		log.info("token:", c.token)
+		log.info('token:', c.token)
 
 		this.conn = new Conn(c)
 		this.state = {
 			audioConnected: false,
 			codeConnected: false,
-			codeText: "// Press Start(or be started), enter some text, then press Send.",
+			codeText:
+				'// Press Start(or be started), enter some text, then press Send.',
 			codeTextareaDisabled: true,
-			token: c.token || null,
+			token: c.token || null
 		}
 		this.updateCodeText = this.updateCodeText.bind(this)
 		this.onCallBtnClick = this.onCallBtnClick.bind(this)
@@ -72,11 +73,10 @@ class App extends React.Component<any, State>{
 		const { audioConnected, codeConnected } = this.state
 		return (
 			<Wrapper>
-				<Header>
-					Online Code
-				</Header>
+				<Header>Online Code</Header>
 				<Wrapper>
-					<SidePannel token={this.state.token}
+					<SidePannel
+						token={this.state.token}
 						onCallBtnClick={this.onCallBtnClick}
 						audioConnected={audioConnected}
 						codeConnected={codeConnected}
@@ -108,7 +108,7 @@ class App extends React.Component<any, State>{
 	}
 
 	private onRemoteAudioAdd() {
-		log.info("audio call succeed")
+		log.info('audio call succeed')
 		this.setState({ audioConnected: true })
 	}
 
