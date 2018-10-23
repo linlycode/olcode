@@ -28,6 +28,7 @@ export default class Editor extends React.Component<any, Props> {
 	private onCodeChange: (code: string) => void
 	private disabled: boolean = true
 	private code: string = ""
+	private disableChangeCallback: boolean = false
 
 	constructor(props: Props) {
 		super(props)
@@ -44,6 +45,9 @@ export default class Editor extends React.Component<any, Props> {
 			this.disabled = disabled
 		}
 		if (code !== undefined && code !== this.code) {
+			// setValue will fire the handleCodeChange but we need disable it
+			// for it via setting disableChangeCallback
+			this.disableChangeCallback = true
 			this.cm.setValue(code)
 			this.code = code
 		}
@@ -69,6 +73,10 @@ export default class Editor extends React.Component<any, Props> {
 	}
 
 	private handleCodeChange() {
+		if (this.disableChangeCallback) {
+			this.disableChangeCallback = false
+			return
+		}
 		// TODO: may use only change set
 		this.code = this.cm.getValue()
 		this.onCodeChange(this.code)
