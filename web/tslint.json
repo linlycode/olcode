@@ -2,6 +2,7 @@
 	"extends": [
 		"tslint:recommended",
 		"tslint-react",
+		"tslint-plugin-prettier",
 		"tslint-config-prettier"
 	],
 	"linterOptions": {
@@ -11,21 +12,13 @@
 		]
 	},
 	"rules": {
+		"prettier": [true,"web/.prettierrc"],
 		"eofline": true,
 		"no-trailing-whitespace": true,
 		"no-unused-expression": [true, "allow-tagged-template"],
 		"linebreak-style": [
 			true,
 			"LF"
-		],
-		"indent": [
-			true,
-			"tabs",
-			2
-		],
-		"semicolon": [
-			true,
-			"never"
 		],
 		"interface-name": false
 	}
