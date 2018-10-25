@@ -21,7 +21,7 @@ const Sider = styled(Layout.Sider)`
 	padding: 10px;
 `
 
-const Status =styled.ul`
+const Status = styled.ul`
 	list-style: none;
 	padding: 0;
 
@@ -30,7 +30,7 @@ const Status =styled.ul`
 	}
 `
 
-const loadingText = "..."
+const loadingText = '...'
 function getShareLink(token: string | null): string {
 	if (token === null) {
 		return loadingText
@@ -46,8 +46,8 @@ interface Props {
 }
 
 interface AddonProps {
-	onClick: () => void,
-	text: string,
+	onClick: () => void
+	text: string
 	icon: string
 }
 
@@ -58,29 +58,27 @@ export default class SidePannel extends React.Component<any, Props> {
 	}
 
 	public render() {
-		const {
-			audioConnected,
-			codeConnected,
-			onCallBtnClick
-		} = this.props
+		const { audioConnected, codeConnected, onCallBtnClick } = this.props
 
 		return (
 			<Sider theme="light" width="300">
 				<Row>
-					<Adress>
-						{getShareLink(this.props.token)}
-					</Adress>
-					<Addon text="copy link" icon="copy" onClick={this.onClickCopyButton}/>
-					<Addon text="audio call" icon="video-camera" onClick={onCallBtnClick}/>
+					<Adress>{getShareLink(this.props.token)}</Adress>
+					<Addon
+						text="copy link"
+						icon="copy"
+						onClick={this.onClickCopyButton}
+					/>
+					<Addon
+						text="audio call"
+						icon="video-camera"
+						onClick={onCallBtnClick}
+					/>
 				</Row>
 				<Row>
 					<Status>
-						<li>
-							audio: {this.connectionStatusText(audioConnected)}
-						</li>
-						<li>
-							code: {this.connectionStatusText(codeConnected)}
-						</li>
+						<li>audio: {this.connectionStatusText(audioConnected)}</li>
+						<li>code: {this.connectionStatusText(codeConnected)}</li>
 					</Status>
 				</Row>
 			</Sider>
@@ -92,16 +90,24 @@ export default class SidePannel extends React.Component<any, Props> {
 	}
 
 	private connectionStatusText(connected: boolean) {
-		return connected
-			? <Tag color="green">connected</Tag>
-			: <Tag color="red">disconnected</Tag>
+		return connected ? (
+			<Tag color="green">connected</Tag>
+		) : (
+			<Tag color="red">disconnected</Tag>
+		)
 	}
 }
 
-function Addon(props:AddonProps) {
-	return <Tooltip placement="top" title={props.text}>
-	<Button style={{ marginLeft: "5px" }} size="small" onClick={props.onClick}>
-		<Icon type={props.icon}	theme="outlined"/>
-	</Button>
-</Tooltip>
+function Addon(props: AddonProps) {
+	return (
+		<Tooltip placement="top" title={props.text}>
+			<Button
+				style={{ marginLeft: '5px' }}
+				size="small"
+				onClick={props.onClick}
+			>
+				<Icon type={props.icon} theme="outlined" />
+			</Button>
+		</Tooltip>
+	)
 }

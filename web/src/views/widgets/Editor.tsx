@@ -13,8 +13,8 @@ const Wrapper = styled.div`
 `
 
 interface Props {
-	disabled?: boolean,
-	code?: string,
+	disabled?: boolean
+	code?: string
 	onCodeChange?: (code: string) => void
 }
 
@@ -27,7 +27,7 @@ export default class Editor extends React.Component<any, Props> {
 	private textAreaElem: HTMLTextAreaElement
 	private onCodeChange: (code: string) => void
 	private disabled: boolean = true
-	private code: string = ""
+	private code: string = ''
 	private disableChangeCallback: boolean = false
 
 	constructor(props: Props) {
@@ -35,7 +35,11 @@ export default class Editor extends React.Component<any, Props> {
 		EditorReferences.push(this)
 		this.disabled = props.disabled || this.disabled
 		this.code = props.code as string
-		this.onCodeChange = props.onCodeChange || (() => { return })
+		this.onCodeChange =
+			props.onCodeChange ||
+			(() => {
+				return
+			})
 	}
 
 	public componentWillReceiveProps(nextProps: Props) {
@@ -61,7 +65,7 @@ export default class Editor extends React.Component<any, Props> {
 		const container = document.getElementById(this.id()) as HTMLElement
 		this.cm = CodeMirror(container, {
 			lineNumbers: true,
-			value: this.code,
+			value: this.code
 		})
 		this.textAreaElem = this.cm.getInputField()
 		this.textAreaElem.disabled = this.disabled

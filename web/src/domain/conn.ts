@@ -1,11 +1,18 @@
 import log from 'src/infra/log'
-import MakePeerConnection, { AVCallbacks, DataChanCallbacks, IceServerConfig, IPeerConn, PeerConnConfig, Sender } from "src/infra/peerconn"
+import MakePeerConnection, {
+	AVCallbacks,
+	DataChanCallbacks,
+	IceServerConfig,
+	IPeerConn,
+	PeerConnConfig,
+	Sender
+} from 'src/infra/peerconn'
 
 // TODO: save this to particular config file
 const iConfig: IceServerConfig = {
 	credential: 'demotoken2018',
 	urls: 'turn:39.105.142.163',
-	username: 'demo',
+	username: 'demo'
 }
 
 export interface ConnConfig {
@@ -23,7 +30,7 @@ function createPeerConnectionConfig(c: ConnConfig): PeerConnConfig {
 	const pConfig: PeerConnConfig = {
 		avCallbacks: c.avCallbacks,
 		dataChCallbacks: c.dataChCallbacks,
-		iceServer: iConfig,
+		iceServer: iConfig
 	}
 	return pConfig
 }
@@ -50,7 +57,9 @@ export default class Conn implements Sender {
 	}
 
 	public connect() {
-		this.ws = new WebSocket(`${this.c.ssl ? "wss" : "ws"}://${this.c.hostname}:${this.c.port}/ws`)
+		this.ws = new WebSocket(
+			`${this.c.ssl ? 'wss' : 'ws'}://${this.c.hostname}:${this.c.port}/ws`
+		)
 		this.ws.onopen = this.onOpen.bind(this)
 		this.ws.onclose = this.onClose.bind(this)
 		this.ws.onmessage = this.onMessage.bind(this)
@@ -80,27 +89,27 @@ export default class Conn implements Sender {
 	}
 
 	private onMessage(ev: MessageEvent) {
-		log.info("receive msg from server:", ev.data)
+		log.info('receive msg from server:', ev.data)
 		const handleError = (errMsg: string) => {
 			log.info(errMsg)
 			this.ws.close()
 		}
 
 		const msg: string = ev.data
-		if (msg.startsWith("ACKHELLO")) {
-			const tokens = msg.split(" ")
+		if (msg.startsWith('ACKHELLO')) {
+			const tokens = msg.split(' ')
 			if (tokens.length !== 4) {
 				handleError(`invalid message: ${msg}`)
 				return
 			}
 			let success
-			[, success, this.roomID, this.peerID] = msg.split(" ")
+			;[, success, this.roomID, this.peerID] = msg.split(' ')
 			if (!success) {
 				handleError(`failed ack hello: ${msg}`)
 				return
 			}
 			this.c.onRecvToken(`${this.roomID}`)
-		} else if (msg.startsWith("PEER_JOINED")) {
+		} else if (msg.startsWith('PEER_JOINED')) {
 			this.pc.connect()
 		} else {
 			// we assume all the other message is used for webrtc connection
@@ -111,17 +120,17 @@ export default class Conn implements Sender {
 
 	// TODO: type of param message should be defined in ts
 	private handleSignalledMessage(message: any) {
-		if (message.type === 'offer' || message.type === "answer") {
+		if (message.type === 'offer' || message.type === 'answer') {
 			const sdp: RTCSessionDescriptionInit = {
 				sdp: message.sdp,
-				type: message.type,
+				type: message.type
 			}
 			this.pc.handlePeerSdp(sdp)
 		} else if (message.type === 'candidate') {
 			const candidate: RTCIceCandidateInit = {
 				candidate: message.candidate,
 				sdpMLineIndex: message.sdpMLineIndex,
-				sdpMid: message.sdpMid,
+				sdpMid: message.sdpMid
 			}
 			this.pc.handlePeerIceCandidate(candidate)
 		}
