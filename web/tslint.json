@@ -9,7 +9,7 @@
 		"exclude": ["config/**/*.js", "node_modules/**/*.ts"]
 	},
 	"rules": {
-		"prettier": [true, ".prettierrc"],
+		"prettier": [true],
 		"eofline": true,
 		"no-trailing-whitespace": true,
 		"no-unused-expression": [true, "allow-tagged-template"],
