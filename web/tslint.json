@@ -6,20 +6,14 @@
 		"tslint-config-prettier"
 	],
 	"linterOptions": {
-		"exclude": [
-			"config/**/*.js",
-			"node_modules/**/*.ts"
-		]
+		"exclude": ["config/**/*.js", "node_modules/**/*.ts"]
 	},
 	"rules": {
-		"prettier": [true,"web/.prettierrc"],
+		"prettier": [true, ".prettierrc"],
 		"eofline": true,
 		"no-trailing-whitespace": true,
 		"no-unused-expression": [true, "allow-tagged-template"],
-		"linebreak-style": [
-			true,
-			"LF"
-		],
+		"linebreak-style": [true, "LF"],
 		"interface-name": false
 	}
 }
