@@ -17,8 +17,9 @@ type contextKey struct {
 }
 
 var (
-	contextJSONDataKey         = contextKey{"json_data_key"}
-	contextJSONDataNotFoundErr = errors.New("json data key not found")
+	contextJSONDataKey = contextKey{"json_data_key"}
+	// ErrCtxJSONDataNotFound defines the error for json data key not found error
+	ErrCtxJSONDataNotFound = errors.New("json data key not found")
 )
 
 func jsonMiddleWare(next http.Handler) http.Handler {
@@ -50,7 +51,7 @@ func jsonMiddleWare(next http.Handler) http.Handler {
 func getJSONData(req *http.Request) ([]byte, error) {
 	data, ok := req.Context().Value(contextJSONDataKey).([]byte)
 	if !ok {
-		return nil, contextJSONDataNotFoundErr
+		return nil, ErrCtxJSONDataNotFound
 	}
 	return data, nil
 }
