@@ -1,1 +1,2 @@
 port: 8081
+db: ~/.olcode_store.db

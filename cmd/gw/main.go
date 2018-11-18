@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 
 	log "github.com/Sirupsen/logrus"
-
 	"github.com/linlycode/olcode/pkg/api"
 	"github.com/linlycode/olcode/pkg/common"
+	"github.com/linlycode/olcode/pkg/db"
 )
 
 var configFilePath = flag.String("config", "", "config file")
@@ -18,6 +18,8 @@ func main() {
 	common.Assertf(err == nil, "cannot open config file %s", *configFilePath)
 	c, err := loadConfig(configData)
 	common.Assertf(err == nil, "fail to load config, err=%v", err)
+
+	common.Assertf(db.InitDB(c.DBPath) == nil, "fail to create database, err=%v", err)
 
 	log.Infof("serve on port %d", c.Port)
 	s := api.NewService(c.Port)

@@ -3,7 +3,8 @@ package main
 import yaml "gopkg.in/yaml.v2"
 
 type config struct {
-	Port int `yaml:"port"`
+	Port   int    `yaml:"port"`
+	DBPath string `yaml:"db"`
 }
 
 func loadConfig(data []byte) (*config, error) {
