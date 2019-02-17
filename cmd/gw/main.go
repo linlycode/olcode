@@ -19,7 +19,8 @@ func main() {
 	c, err := loadConfig(configData)
 	common.Assertf(err == nil, "fail to load config, err=%v", err)
 
-	common.Assertf(db.InitDB(c.DBPath) == nil, "fail to create database, err=%v", err)
+	err = db.InitDB(c.DBPath)
+	common.Assertf(err == nil, "fail to create database, err=%v", err)
 
 	log.Infof("serve on port %d", c.Port)
 	s := api.NewService(c.Port)
