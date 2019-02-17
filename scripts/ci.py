@@ -25,7 +25,7 @@ def run_once(idx):
     3. compare the pulled commit id with recorded commit id & done for this loop if they the same
     4. build the whole system and run it if build successfully
     """
-    log("start ci#", idx)
+    log("start ci#{}".format(idx))
     current_version = execute(CURRENT_VERSION_COMMAND, capture=True)
     latest_version = execute(REMOTE_VERSION_COMMAND, capture=True)
 
