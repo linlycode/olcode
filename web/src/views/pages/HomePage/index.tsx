@@ -6,6 +6,7 @@ import config from 'src/config'
 import Conn, { ConnConfig } from 'src/domain/conn'
 import log from 'src/infra/log'
 import { AVCallbacks, DataChanCallbacks } from 'src/infra/peerconn'
+import { GlobalStyle } from 'src/styles/gloabal'
 import CodeEditor from 'src/views/widgets/Editor'
 import SidePannel from './SidePannel'
 
@@ -89,6 +90,7 @@ class App extends React.Component<any, State> {
 						/>
 					</Layout.Content>
 				</Wrapper>
+				<GlobalStyle />
 			</Wrapper>
 		)
 	}

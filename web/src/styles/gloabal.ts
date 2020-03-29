@@ -1,6 +1,6 @@
-import { injectGlobal } from 'styled-components'
+import { createGlobalStyle } from "styled-components"
 
-injectGlobal`
+export const GlobalStyle = createGlobalStyle`
   #root {
     height: 100%;
   }
